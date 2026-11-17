@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Rollout.Api/Rollout.Api.csproj" />
+  <Project Path="Rollout.Tests/Rollout.Tests.csproj" />
+</Solution>
