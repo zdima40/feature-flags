@@ -1,0 +1,46 @@
+{
+  "name": "rollout-frontend",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "npm@11.16.0",
+  "engines": {
+    "node": "24.18.0"
+  },
+  "dependencies": {
+    "@angular/common": "22.2.6",
+    "@angular/compiler": "22.2.6",
+    "@angular/core": "22.2.6",
+    "@angular/forms": "22.2.6",
+    "@angular/platform-browser": "22.2.6",
+    "@angular/router": "22.2.6",
+    "@taiga-ui/addon-table": "5.33.0",
+    "@taiga-ui/core": "5.33.0",
+    "@taiga-ui/styles": "5.33.0",
+    "rxjs": "7.8.2",
+    "tslib": "2.9.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.2.7",
+    "@angular/cli": "22.2.7",
+    "@angular/compiler-cli": "22.2.6",
+    "@eslint/js": "10.0.1",
+    "@tailwindcss/postcss": "4.3.5",
+    "angular-eslint": "22.7.0",
+    "eslint": "10.15.0",
+    "eslint-config-prettier": "10.1.8",
+    "jsdom": "31.0.1",
+    "postcss": "8.5.33",
+    "prettier": "3.10.1",
+    "tailwindcss": "4.3.5",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.73.0",
+    "vitest": "5.1.0"
+  },
+  "overrides": {
+    "minimatch@>=7 <11.0.1": "11.0.9",
+    "@oxc-parser/binding-wasm32-wasi@0.156.0": {
+      "@emnapi/core": "2.0.0-beta.3",
+      "@emnapi/runtime": "2.0.0-beta.3"
+    }
+  }
+}
