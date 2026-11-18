@@ -24,6 +24,7 @@
     "@angular/router": "22.2.6",
     "@taiga-ui/addon-table": "5.33.0",
     "@taiga-ui/core": "5.33.0",
+    "@taiga-ui/kit": "5.33.0",
     "@taiga-ui/styles": "5.33.0",
     "rxjs": "7.8.2",
     "tslib": "2.9.1"

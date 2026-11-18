@@ -24,9 +24,20 @@ select {
   color: var(--tui-text-secondary);
 }
 
+.feedback {
+  padding: 0.875rem 1rem;
+  border: 1px solid #495057;
+  border-radius: 0.75rem;
+  background: var(--tui-background-base-alt);
+}
+
+.flag-error {
+  color: var(--tui-text-negative);
+}
+
 table {
   width: 100%;
-  min-width: 44rem;
+  min-width: 53rem;
   border-collapse: collapse;
   text-align: start;
 }

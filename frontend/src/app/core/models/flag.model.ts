@@ -8,15 +8,28 @@ export interface FlagListQuery {
   pageSize: number;
 }
 
-export interface FlagListItem {
-  id: string;
-  key: string;
-  name: string;
-  description: string | null;
+export interface FlagEnvironmentSettings {
   environment: FlagEnvironment;
   enabled: boolean;
   rolloutPercentage: number;
   updatedAtUtc: string;
+}
+
+export interface FlagListItem extends FlagEnvironmentSettings {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+}
+
+export interface FlagResponse {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  environments: FlagEnvironmentSettings[];
 }
 
 export interface PageResponse<T> {

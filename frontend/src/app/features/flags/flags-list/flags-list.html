@@ -1,10 +1,13 @@
 <section class="mt-7" aria-labelledby="flags-heading">
-  <h2 id="flags-heading" class="m-0 text-2xl font-semibold">Список флагов</h2>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 id="flags-heading" class="m-0 text-2xl font-semibold">Список флагов</h2>
+    <a tuiButton size="m" routerLink="/flags/new">Создать флаг</a>
+  </div>
 
   <div class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
     <div class="grid gap-1.5">
       <label for="flag-search">Поиск</label>
-      <tui-textfield tuiSize="m">
+      <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
         <input
           #searchInput
           tuiTextfield
@@ -47,7 +50,55 @@
     </div>
   </div>
 
-  @if (flags.hasValue()) {
+  <div role="status">
+    @if (notice(); as feedback) {
+      @if (!feedback.error) {
+        <p class="feedback mt-4 mb-0 text-accent">{{ feedback.message }}</p>
+      }
+    }
+  </div>
+  <div role="alert">
+    @if (notice(); as feedback) {
+      @if (feedback.error) {
+        <p class="feedback flag-error mt-4 mb-0">{{ feedback.message }}</p>
+      }
+    }
+  </div>
+
+  <div role="status">
+    @if (flags.isLoading()) {
+      <p class="mt-4 mb-0">Загружаем флаги…</p>
+    } @else if (flags.hasValue() && flags.value().items.length === 0) {
+      <p class="feedback mt-5 mb-0">
+        @if (enabled() !== undefined || search().trim()) {
+          По заданным фильтрам флаги не найдены.
+        } @else {
+          Флагов пока нет.
+        }
+      </p>
+    }
+  </div>
+
+  @if (flags.status() === 'error') {
+    <div
+      class="feedback mt-5 flex flex-wrap items-center justify-between gap-3"
+    >
+      <p class="flag-error m-0" role="alert">
+        Не удалось загрузить список флагов.
+      </p>
+      <button
+        tuiButton
+        appearance="outline"
+        size="s"
+        type="button"
+        (click)="flags.reload()"
+      >
+        Повторить
+      </button>
+    </div>
+  }
+
+  @if (flags.hasValue() && flags.value().items.length > 0) {
     <div
       class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
       role="region"
@@ -62,6 +113,7 @@
             <th scope="col">Статус</th>
             <th scope="col">Rollout</th>
             <th scope="col">Последнее изменение</th>
+            <th scope="col">Действия</th>
           </tr>
         </thead>
         <tbody>
@@ -77,12 +129,47 @@
                 }
               </th>
               <td>{{ flag.environment }}</td>
-              <td>{{ flag.enabled ? 'Включён' : 'Выключен' }}</td>
+              <td>
+                @let pending = saving().has(flagKey(flag));
+                <div class="flex items-center gap-2">
+                  <input
+                    tuiSwitch
+                    type="checkbox"
+                    [showIcons]="false"
+                    [ngModel]="flag.enabled"
+                    [attr.aria-label]="'Статус флага «' + flag.name + '»'"
+                    [attr.aria-disabled]="pending || flags.isLoading()"
+                    (click)="toggleFlag($event, flag)"
+                  />
+                  <span>{{ flag.enabled ? 'Включён' : 'Выключен' }}</span>
+                </div>
+                @if (pending) {
+                  <span class="mt-1 block text-xs" role="status"
+                    >Сохранение…</span
+                  >
+                }
+              </td>
               <td class="tabular-nums">{{ flag.rolloutPercentage }}%</td>
               <td class="whitespace-nowrap tabular-nums">
                 <time [attr.datetime]="flag.updatedAtUtc">
                   {{ flag.updatedAtUtc | date: 'dd.MM.yyyy, HH:mm' }}
                 </time>
+              </td>
+              <td>
+                <div class="flex flex-wrap gap-x-3 gap-y-1">
+                  <a
+                    tuiLink
+                    [routerLink]="['/flags', flag.id, 'edit']"
+                    [attr.aria-label]="'Изменить флаг «' + flag.name + '»'"
+                    >Изменить</a
+                  >
+                  <a
+                    tuiLink
+                    [routerLink]="['/flags', flag.id, 'history']"
+                    [attr.aria-label]="'История флага «' + flag.name + '»'"
+                    >История</a
+                  >
+                </div>
               </td>
             </tr>
           }
