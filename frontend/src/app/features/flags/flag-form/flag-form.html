@@ -174,17 +174,6 @@
               }
             </div>
           }
-          @if (id()) {
-            <p class="field-hint m-0 text-sm">
-              При сохранении обновятся общие поля и настройки выбранного
-              окружения ({{ activeEnvironment() }}).
-            </p>
-          } @else {
-            <p class="field-hint m-0 text-sm">
-              При создании сохранятся настройки {{ activeEnvironment() }}. В
-              остальных окружениях флаг будет выключен с rollout 0%.
-            </p>
-          }
         </fieldset>
         <div class="flex flex-wrap gap-3">
           <button tuiButton size="m" type="submit">Сохранить</button>
