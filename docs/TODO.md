@@ -6,12 +6,6 @@
 
 ## 1. Frontend
 
-### Список флагов
-
-Для подключения нужны `GET /api/flags` и `PATCH /api/flags/{id}`.
-
-- [ ] Проверить запросы через `HttpTestingController`, состояния списка и ошибку переключения через Vitest и Angular TestBed.
-
 ### Создание и редактирование
 
 Для подключения нужны `POST /api/flags`, `GET /api/flags/{id}` и `PATCH /api/flags/{id}`.
