@@ -6,12 +6,6 @@
 
 ## 1. Frontend
 
-### Создание и редактирование
-
-Для подключения нужны `POST /api/flags`, `GET /api/flags/{id}` и `PATCH /api/flags/{id}`.
-
-- [ ] Покрыть Vitest и Angular TestBed валидацию, неизменяемость ключа и состояния формы. Проверить тела запросов и обработку ошибок через `HttpTestingController`.
-
 ### История
 
 Для подключения нужен `GET /api/flags/{id}/history`.
