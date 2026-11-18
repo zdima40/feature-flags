@@ -10,7 +10,7 @@ import {
 import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { TuiButton, TuiLink, TuiTextfield } from '@taiga-ui/core';
+import { TuiButton, TuiInput, TuiLink } from '@taiga-ui/core';
 import { TuiSwitch } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
@@ -35,7 +35,7 @@ function lastPage(result: PageResponse<FlagListItem>): number {
     TuiButton,
     TuiLink,
     TuiSwitch,
-    TuiTextfield,
+    TuiInput,
   ],
   selector: 'app-flags-list',
   styleUrl: './flags-list.css',

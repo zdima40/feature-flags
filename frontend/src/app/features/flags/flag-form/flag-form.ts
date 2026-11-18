@@ -19,7 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TuiButton, TuiLink, TuiTextfield } from '@taiga-ui/core';
+import { TuiButton, TuiInput, TuiLink } from '@taiga-ui/core';
 import { TuiSwitch, TuiTextarea } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
@@ -75,7 +75,7 @@ function saveErrors(error: unknown): string[] {
     TuiLink,
     TuiSwitch,
     TuiTextarea,
-    TuiTextfield,
+    TuiInput,
   ],
   selector: 'app-flag-form',
   styleUrl: './flag-form.css',
