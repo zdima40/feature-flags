@@ -109,16 +109,23 @@ describe('FlagForm', () => {
     );
   }
 
-  async function expectFlagList(): Promise<void> {
-    expect(router.url).toBe('/flags');
+  async function expectFlagList(environment?: string): Promise<void> {
+    expect(router.url).toBe(
+      environment ? `/flags?environment=${environment}` : '/flags',
+    );
     TestBed.tick();
-    http
-      .expectOne(
-        (request) => request.method === 'GET' && request.url === '/api/flags',
-      )
-      .flush({ items: [], totalCount: 0, page: 1, pageSize: 20 });
+    const request = http.expectOne(
+      (request) => request.method === 'GET' && request.url === '/api/flags',
+    );
+    expect(request.request.params.get('environment')).toBe(
+      environment ?? 'Development',
+    );
+    request.flush({ items: [], totalCount: 0, page: 1, pageSize: 20 });
     await harness.fixture.whenStable();
     expect(element('h2').textContent).toContain('Список флагов');
+    expect(element<HTMLSelectElement>('#flag-environment').value).toBe(
+      environment ?? 'Development',
+    );
   }
 
   it('marks missing name and key after submission and sends no request', async () => {
@@ -191,7 +198,7 @@ describe('FlagForm', () => {
     const navigation = nextNavigation();
     post.flush(flag, { status: 201, statusText: 'Created' });
     await navigation;
-    await expectFlagList();
+    await expectFlagList('Staging');
   });
 
   it('updates the selected environment without sending the key and returns to the list', async () => {
@@ -242,7 +249,7 @@ describe('FlagForm', () => {
       ),
     });
     await navigation;
-    await expectFlagList();
+    await expectFlagList('Production');
   });
 
   it('handles a load failure and retries with GET', async () => {

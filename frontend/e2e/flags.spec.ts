@@ -21,9 +21,13 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   const listHeading = page.getByRole('heading', { name: 'Список флагов' });
   const search = page.getByRole('searchbox', { name: 'Поиск' });
   const edit = page.getByRole('link', { name: `Изменить флаг «${name}»` });
-  await expect(page).toHaveURL('/flags');
+  await expect(page).toHaveURL('/flags?environment=Staging');
   await expect(listHeading).toBeVisible();
+  await expect(environment).toHaveValue('Staging');
   await search.fill(key);
+  const row = page.getByRole('row').filter({ hasText: key });
+  await expect(row.getByRole('switch')).toBeChecked();
+  await expect(row.getByRole('cell', { name: '25%' })).toBeVisible();
   await edit.click();
   await expect(page.getByLabel('Ключ', { exact: true })).toBeDisabled();
   await environment.selectOption('Staging');
@@ -33,7 +37,7 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await enabled.uncheck();
   await rollout.fill('60');
   await save.click();
-  await expect(page).toHaveURL('/flags');
+  await expect(page).toHaveURL('/flags?environment=Staging');
   await expect(listHeading).toBeVisible();
   await search.fill(key);
   await edit.click();

@@ -2,7 +2,10 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { NavigationEnd, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
+import { filter, firstValueFrom } from 'rxjs';
 import { appConfig } from '../../../app.config';
 import {
   FlagListItem,
@@ -42,11 +45,11 @@ function result(
 }
 
 describe('FlagsList', () => {
-  let fixture: ComponentFixture<FlagsList>;
+  let fixture: RouterTestingHarness['fixture'];
   let page: HTMLElement;
   let http: HttpTestingController;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.stubGlobal('matchMedia', (query: string) =>
       Object.assign(new EventTarget(), { matches: false, media: query }),
     );
@@ -54,8 +57,14 @@ describe('FlagsList', () => {
       providers: [...appConfig.providers, provideHttpClientTesting()],
     });
     http = TestBed.inject(HttpTestingController);
-    fixture = TestBed.createComponent(FlagsList);
-    page = fixture.nativeElement;
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/flags', FlagsList);
+    fixture = harness.fixture;
+    const list = harness.routeNativeElement;
+    if (!list) {
+      throw new Error('Missing flags list');
+    }
+    page = list;
   });
 
   afterEach(() => {
@@ -156,7 +165,17 @@ describe('FlagsList', () => {
       await fixture.whenStable();
       expect(page.textContent).toMatch(/Страница 2\s+из 2/);
 
-      changeFilter(selector, value);
+      if (selector === '#flag-environment') {
+        const router = TestBed.inject(Router);
+        const navigation = firstValueFrom(
+          router.events.pipe(filter((event) => event instanceof NavigationEnd)),
+        );
+        changeFilter(selector, value);
+        await navigation;
+        expect(router.url).toBe(`/flags?environment=${value}`);
+      } else {
+        changeFilter(selector, value);
+      }
       listRequest(params).flush(result([]));
       await fixture.whenStable();
       expect(page.textContent).toMatch(/Страница 1\s+из 1/);

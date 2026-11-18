@@ -160,7 +160,10 @@ export class FlagForm {
           }
           this.confirmation.set(id ? 'Флаг сохранён.' : 'Флаг создан.');
           void this.router
-            .navigateByUrl('/flags', { replaceUrl: true })
+            .navigate(['/flags'], {
+              queryParams: { environment },
+              replaceUrl: true,
+            })
             .catch(() => {
               // The confirmation offers a link if automatic navigation fails.
             });

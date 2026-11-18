@@ -7,9 +7,13 @@ import {
   linkedSignal,
   signal,
 } from '@angular/core';
-import { rxResource, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import {
+  rxResource,
+  takeUntilDestroyed,
+  toSignal,
+} from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TuiButton, TuiInput, TuiLink } from '@taiga-ui/core';
 import { TuiSwitch } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
@@ -44,6 +48,11 @@ function lastPage(result: PageResponse<FlagListItem>): number {
 export class FlagsList {
   private readonly api = inject(FlagsApiService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly queryParams = toSignal(this.route.queryParamMap, {
+    requireSync: true,
+  });
   private readonly refresh = signal(0);
 
   protected readonly saving = signal<ReadonlySet<string>>(new Set());
@@ -52,7 +61,13 @@ export class FlagsList {
   >(undefined);
 
   protected readonly environments = FLAG_ENVIRONMENTS;
-  protected readonly environment = signal<FlagEnvironment>('Development');
+  protected readonly environment = computed(() => {
+    const selected = this.queryParams().get('environment');
+    return (
+      this.environments.find((environment) => environment === selected) ??
+      'Development'
+    );
+  });
   protected readonly search = signal('');
   protected readonly enabled = signal<boolean | undefined>(undefined);
 
@@ -90,6 +105,15 @@ export class FlagsList {
 
   protected flagKey(flag: FlagListItem): string {
     return `${flag.environment}/${flag.id}`;
+  }
+
+  protected changeEnvironment(environment: FlagEnvironment): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { environment },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   protected changePage(page: number): void {

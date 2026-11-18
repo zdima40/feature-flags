@@ -21,11 +21,9 @@
     <div class="grid gap-1.5">
       <label for="flag-environment">Окружение</label>
       <select
-        #environmentSelect
         id="flag-environment"
-        (change)="
-          environment.set(environments[environmentSelect.selectedIndex])
-        "
+        [ngModel]="environment()"
+        (ngModelChange)="changeEnvironment($event)"
       >
         @for (option of environments; track option) {
           <option [value]="option">{{ option }}</option>

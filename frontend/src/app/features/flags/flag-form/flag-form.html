@@ -10,7 +10,12 @@
   </div>
 
   @if (confirmation()) {
-    <a tuiLink routerLink="/flags">К списку флагов</a>
+    <a
+      tuiLink
+      routerLink="/flags"
+      [queryParams]="{ environment: form.controls.environment.value }"
+      >К списку флагов</a
+    >
   } @else if (flag.isLoading()) {
     <p role="status">Загружаем флаг…</p>
   } @else if (flag.status() === 'error') {
