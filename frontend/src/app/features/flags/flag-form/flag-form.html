@@ -13,7 +13,7 @@
     <a
       tuiLink
       routerLink="/flags"
-      [queryParams]="{ environment: form.controls.environment.value }"
+      [queryParams]="{ environment: activeEnvironment() }"
       >К списку флагов</a
     >
   } @else if (flag.isLoading()) {
@@ -34,12 +34,8 @@
     </div>
   } @else {
     @let fields = form.controls;
-    @let environmentFields = settings[fields.environment.value].controls;
     @let nameInvalid = fields.name.touched && fields.name.invalid;
     @let keyInvalid = fields.key.touched && fields.key.invalid;
-    @let rolloutInvalid =
-      environmentFields.rolloutPercentage.touched &&
-      environmentFields.rolloutPercentage.invalid;
     <form
       class="mt-5"
       [formGroup]="form"
@@ -111,53 +107,82 @@
           class="border-divider m-0 grid min-w-0 gap-4 rounded-xl border p-4"
         >
           <legend class="px-1 font-semibold">Настройки окружения</legend>
-          <div class="grid gap-1.5">
-            <label for="flag-environment">Окружение</label>
-            <select id="flag-environment" formControlName="environment">
-              @for (environment of environments; track environment) {
-                <option [value]="environment">{{ environment }}</option>
-              }
-            </select>
-          </div>
-          <div class="flex items-center gap-2">
-            <input
-              tuiSwitch
-              id="flag-enabled"
-              type="checkbox"
-              [formControl]="environmentFields.enabled"
-              [showIcons]="false"
-            />
-            <label for="flag-enabled">Флаг включён</label>
-          </div>
-          <div class="grid gap-1.5">
-            <label for="flag-rollout">Rollout (%)</label>
-            <input
-              id="flag-rollout"
-              type="number"
-              min="0"
-              max="100"
-              step="1"
-              required
-              [formControl]="environmentFields.rolloutPercentage"
-              [attr.aria-invalid]="rolloutInvalid"
-              [attr.aria-describedby]="
-                rolloutInvalid ? 'flag-rollout-error' : null
-              "
-            />
-            @if (rolloutInvalid) {
-              <span id="flag-rollout-error" class="field-error text-sm"
-                >Введите целое число от 0 до 100.</span
+          <tui-tabs
+            role="tablist"
+            aria-label="Окружение"
+            size="m"
+            [(activeItemIndex)]="activeEnvironmentIndex"
+          >
+            @for (environment of environments; track environment) {
+              <button
+                tuiTab
+                type="button"
+                role="tab"
+                [id]="'flag-tab-' + environment"
+                [attr.aria-controls]="'flag-panel-' + environment"
+                [attr.aria-selected]="environment === activeEnvironment()"
               >
+                {{ environment }}
+              </button>
             }
-          </div>
+          </tui-tabs>
+          @for (environment of environments; track environment) {
+            <div
+              role="tabpanel"
+              [id]="'flag-panel-' + environment"
+              [attr.aria-labelledby]="'flag-tab-' + environment"
+              [hidden]="environment !== activeEnvironment()"
+            >
+              @if (environment === activeEnvironment()) {
+                @let environmentFields = settings[environment].controls;
+                @let rolloutInvalid =
+                  environmentFields.rolloutPercentage.touched &&
+                  environmentFields.rolloutPercentage.invalid;
+                <div class="grid gap-4">
+                  <div class="flex items-center gap-2">
+                    <input
+                      tuiSwitch
+                      id="flag-enabled"
+                      type="checkbox"
+                      [formControl]="environmentFields.enabled"
+                      [showIcons]="false"
+                    />
+                    <label for="flag-enabled">Флаг включён</label>
+                  </div>
+                  <div class="grid gap-1.5">
+                    <label for="flag-rollout">Rollout (%)</label>
+                    <input
+                      id="flag-rollout"
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="1"
+                      required
+                      [formControl]="environmentFields.rolloutPercentage"
+                      [attr.aria-invalid]="rolloutInvalid"
+                      [attr.aria-describedby]="
+                        rolloutInvalid ? 'flag-rollout-error' : null
+                      "
+                    />
+                    @if (rolloutInvalid) {
+                      <span id="flag-rollout-error" class="field-error text-sm"
+                        >Введите целое число от 0 до 100.</span
+                      >
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
           @if (id()) {
             <p class="field-hint m-0 text-sm">
               При сохранении обновятся общие поля и настройки выбранного
-              окружения.
+              окружения ({{ activeEnvironment() }}).
             </p>
           } @else {
             <p class="field-hint m-0 text-sm">
-              В остальных окружениях новый флаг будет выключен с rollout 0%.
+              При создании сохранятся настройки {{ activeEnvironment() }}. В
+              остальных окружениях флаг будет выключен с rollout 0%.
             </p>
           }
         </fieldset>

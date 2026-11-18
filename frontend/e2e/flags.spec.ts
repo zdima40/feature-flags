@@ -10,11 +10,11 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await page.getByRole('link', { name: 'Создать флаг' }).click();
   await page.getByLabel('Название', { exact: true }).fill(name);
   await page.getByLabel('Ключ', { exact: true }).fill(key);
-  const environment = page.getByLabel('Окружение', { exact: true });
+  const environmentTab = (name: string) => page.getByRole('tab', { name });
   const enabled = page.getByLabel('Флаг включён');
   const rollout = page.getByRole('spinbutton', { name: 'Rollout (%)' });
   const save = page.getByRole('button', { name: 'Сохранить' });
-  await environment.selectOption('Staging');
+  await environmentTab('Staging').click();
   await enabled.check();
   await rollout.fill('25');
   await save.click();
@@ -23,14 +23,16 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   const edit = page.getByRole('link', { name: `Изменить флаг «${name}»` });
   await expect(page).toHaveURL('/flags?environment=Staging');
   await expect(listHeading).toBeVisible();
-  await expect(environment).toHaveValue('Staging');
+  await expect(page.getByRole('combobox', { name: 'Окружение' })).toHaveValue(
+    'Staging',
+  );
   await search.fill(key);
   const row = page.getByRole('row').filter({ hasText: key });
   await expect(row.getByRole('switch')).toBeChecked();
   await expect(row.getByRole('cell', { name: '25%' })).toBeVisible();
   await edit.click();
   await expect(page.getByLabel('Ключ', { exact: true })).toBeDisabled();
-  await environment.selectOption('Staging');
+  await environmentTab('Staging').click();
   await expect(enabled).toBeChecked();
   await expect(rollout).toHaveValue('25');
 
@@ -42,11 +44,11 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await search.fill(key);
   await edit.click();
   for (const other of ['Development', 'Production']) {
-    await environment.selectOption(other);
+    await environmentTab(other).click();
     await expect(enabled).not.toBeChecked();
     await expect(rollout).toHaveValue('0');
   }
-  await environment.selectOption('Staging');
+  await environmentTab('Staging').click();
   await expect(enabled).not.toBeChecked();
   await expect(rollout).toHaveValue('60');
 

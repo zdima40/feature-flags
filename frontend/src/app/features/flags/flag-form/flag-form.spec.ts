@@ -85,10 +85,10 @@ describe('FlagForm', () => {
   }
 
   async function selectEnvironment(value: string): Promise<void> {
-    const select = element<HTMLSelectElement>('#flag-environment');
-    select.value = value;
-    select.dispatchEvent(new Event('change', { bubbles: true }));
+    const tab = element<HTMLButtonElement>(`#flag-tab-${value}`);
+    tab.click();
     await harness.fixture.whenStable();
+    expect(tab.getAttribute('aria-selected')).toBe('true');
   }
 
   function submit(): void {
@@ -177,6 +177,12 @@ describe('FlagForm', () => {
     await selectEnvironment('Staging');
     input('enabled').click();
     fill('rollout', '25');
+    await selectEnvironment('Production');
+    expect(input('enabled').checked).toBe(false);
+    expect(input('rollout').value).toBe('0');
+    await selectEnvironment('Staging');
+    expect(input('enabled').checked).toBe(true);
+    expect(input('rollout').value).toBe('25');
     submit();
     await harness.fixture.whenStable();
 
@@ -337,7 +343,7 @@ describe('FlagForm', () => {
     expect(router.url).toBe(editUrl);
 
     const navigation = nextNavigation();
-    element<HTMLButtonElement>('form button[type="button"]').click();
+    element<HTMLButtonElement>('form button[tuiButton][type="button"]').click();
     await navigation;
     await expectFlagList();
     http.expectNone({ method: 'PATCH', url: flagUrl });

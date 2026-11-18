@@ -62,7 +62,22 @@ for (const width of [1440, 390]) {
       await tabTo(page, name);
       await tabTo(page, keyField);
       await tabTo(page, page.getByRole('textbox', { name: 'Описание' }));
-      await tabTo(page, page.getByRole('combobox', { name: 'Окружение' }));
+      const development = page.getByRole('tab', { name: 'Development' });
+      const staging = page.getByRole('tab', { name: 'Staging' });
+      const production = page.getByRole('tab', { name: 'Production' });
+      await tabTo(page, development);
+      await expect(development).toHaveAttribute('aria-selected', 'true');
+      await page.keyboard.press('ArrowRight');
+      await expect(staging).toBeFocused();
+      await page.keyboard.press('Enter');
+      await expect(staging).toHaveAttribute('aria-selected', 'true');
+      await expect(
+        page.getByRole('tabpanel', { name: 'Staging' }),
+      ).toBeVisible();
+      await page.keyboard.press('ArrowRight');
+      await expect(production).toBeFocused();
+      await page.keyboard.press('Space');
+      await expect(production).toHaveAttribute('aria-selected', 'true');
       const formSwitch = page.getByRole('switch', { name: 'Флаг включён' });
       await tabTo(page, formSwitch);
       await page.keyboard.press('Space');

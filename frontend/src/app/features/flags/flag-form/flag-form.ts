@@ -20,12 +20,11 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TuiButton, TuiInput, TuiLink } from '@taiga-ui/core';
-import { TuiSwitch, TuiTextarea } from '@taiga-ui/kit';
+import { TuiSwitch, TuiTabs, TuiTextarea } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
 import {
   FLAG_ENVIRONMENTS,
-  FlagEnvironment,
   FlagResponse,
 } from '../../../core/models/flag.model';
 
@@ -74,6 +73,7 @@ function saveErrors(error: unknown): string[] {
     TuiButton,
     TuiLink,
     TuiSwitch,
+    TuiTabs,
     TuiTextarea,
     TuiInput,
   ],
@@ -101,6 +101,10 @@ export class FlagForm {
   });
   protected readonly saving = signal(false);
   protected readonly environments = FLAG_ENVIRONMENTS;
+  protected readonly activeEnvironmentIndex = signal(0);
+  protected readonly activeEnvironment = computed(
+    () => this.environments[this.activeEnvironmentIndex()],
+  );
   protected readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.pattern(/\S/)]],
     key: this.fb.control({ value: '', disabled: this.id() !== null }, [
@@ -108,7 +112,6 @@ export class FlagForm {
       Validators.pattern(/^[A-Za-z0-9_-]+$/),
     ]),
     description: '',
-    environment: this.fb.control<FlagEnvironment>('Development'),
   });
 
   protected readonly settings = {
@@ -129,7 +132,8 @@ export class FlagForm {
     }
 
     const id = this.id();
-    const { key, name, description, environment } = this.form.getRawValue();
+    const { key, name, description } = this.form.getRawValue();
+    const environment = this.activeEnvironment();
     const settings = this.settings[environment];
     const { enabled, rolloutPercentage } = settings.getRawValue();
     if (this.form.invalid || settings.invalid || rolloutPercentage === null) {
@@ -198,8 +202,8 @@ export class FlagForm {
       name: flag.name,
       key: { value: flag.key, disabled: true },
       description: flag.description ?? '',
-      environment: 'Development',
     });
+    this.activeEnvironmentIndex.set(0);
     for (const settings of flag.environments) {
       this.settings[settings.environment].reset(settings);
     }
