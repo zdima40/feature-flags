@@ -1,6 +1,52 @@
 <section class="mt-7" aria-labelledby="flags-heading">
   <h2 id="flags-heading" class="m-0 text-2xl font-semibold">Список флагов</h2>
 
+  <div class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+    <div class="grid gap-1.5">
+      <label for="flag-search">Поиск</label>
+      <tui-textfield tuiSize="m">
+        <input
+          #searchInput
+          tuiTextfield
+          id="flag-search"
+          type="search"
+          placeholder="Название или ключ"
+          (input)="search.set(searchInput.value)"
+        />
+      </tui-textfield>
+    </div>
+    <div class="grid gap-1.5">
+      <label for="flag-environment">Окружение</label>
+      <select
+        #environmentSelect
+        id="flag-environment"
+        (change)="
+          environment.set(environments[environmentSelect.selectedIndex])
+        "
+      >
+        @for (option of environments; track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </div>
+    <div class="grid gap-1.5">
+      <label for="flag-status">Статус</label>
+      <select
+        #statusSelect
+        id="flag-status"
+        (change)="
+          enabled.set(
+            statusSelect.value ? statusSelect.value === 'true' : undefined
+          )
+        "
+      >
+        <option value="">Все статусы</option>
+        <option value="true">Включённые</option>
+        <option value="false">Выключенные</option>
+      </select>
+    </div>
+  </div>
+
   @if (flags.hasValue()) {
     <div
       class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
@@ -44,4 +90,47 @@
       </table>
     </div>
   }
+
+  <nav
+    class="mt-4 flex flex-wrap items-center justify-between gap-3"
+    aria-label="Страницы флагов"
+  >
+    <span class="flag-count">
+      @if (flags.hasValue()) {
+        Всего флагов: {{ flags.value().totalCount }}
+      }
+    </span>
+    <div class="flex items-center gap-2">
+      <button
+        tuiButton
+        appearance="outline"
+        size="s"
+        type="button"
+        [attr.aria-disabled]="
+          page() <= 1 || flags.isLoading() || !flags.hasValue()
+        "
+        (click)="changePage(page() - 1)"
+      >
+        Назад
+      </button>
+      <span class="px-1 tabular-nums" aria-live="polite">
+        Страница {{ page() }}
+        @if (flags.hasValue()) {
+          из {{ pageCount() }}
+        }
+      </span>
+      <button
+        tuiButton
+        appearance="outline"
+        size="s"
+        type="button"
+        [attr.aria-disabled]="
+          page() >= pageCount() || flags.isLoading() || !flags.hasValue()
+        "
+        (click)="changePage(page() + 1)"
+      >
+        Вперёд
+      </button>
+    </div>
+  </nav>
 </section>

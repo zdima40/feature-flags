@@ -1,12 +1,24 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { FlagListItem, PageResponse } from '../models/flag.model';
+import {
+  FlagListItem,
+  FlagListQuery,
+  PageResponse,
+} from '../models/flag.model';
 
 @Service()
 export class FlagsApiService {
   private readonly http = inject(HttpClient);
 
-  list() {
-    return this.http.get<PageResponse<FlagListItem>>('/api/flags');
+  list({ environment, search, enabled, page, pageSize }: FlagListQuery) {
+    return this.http.get<PageResponse<FlagListItem>>('/api/flags', {
+      params: {
+        environment,
+        page,
+        pageSize,
+        ...(search ? { search } : {}),
+        ...(enabled === undefined ? {} : { enabled }),
+      },
+    });
   }
 }

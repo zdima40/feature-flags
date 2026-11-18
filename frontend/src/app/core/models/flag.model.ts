@@ -1,5 +1,13 @@
 export type FlagEnvironment = 'Development' | 'Staging' | 'Production';
 
+export interface FlagListQuery {
+  environment: FlagEnvironment;
+  search: string;
+  enabled: boolean | undefined;
+  page: number;
+  pageSize: number;
+}
+
 export interface FlagListItem {
   id: string;
   key: string;
