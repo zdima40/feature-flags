@@ -2,6 +2,24 @@
 
 Rollout — панель управления feature flags. API хранит настройки отдельно для Development, Staging и Production. Процент rollout сохраняется как настройка для будущего распределения пользователей.
 
+## Локальный запуск frontend
+
+Используйте Node.js 24.18.0 и npm 11.16.0. Из корня репозитория запустите API в отдельном терминале:
+
+```sh
+dotnet run --project backend/Rollout.Api --launch-profile http
+```
+
+Во втором терминале выполните:
+
+```sh
+cd frontend
+npm ci
+npm start
+```
+
+Angular доступен на [http://localhost:4200](http://localhost:4200). Dev-сервер направляет запросы `/api/*` на `http://localhost:5155`, включая вложенные маршруты. Для проверки откройте [список флагов через прокси](http://localhost:4200/api/flags).
+
 ## Локальный запуск backend
 
 Установите [.NET SDK 10.0.404](https://dotnet.microsoft.com/en-us/download/dotnet/10.0). Выполняйте команды из корня репозитория.
