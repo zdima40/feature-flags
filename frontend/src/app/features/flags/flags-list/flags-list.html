@@ -1,0 +1,47 @@
+<section class="mt-7" aria-labelledby="flags-heading">
+  <h2 id="flags-heading" class="m-0 text-2xl font-semibold">Список флагов</h2>
+
+  @if (flags.hasValue()) {
+    <div
+      class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
+      role="region"
+      aria-label="Таблица флагов"
+      tabindex="0"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Флаг</th>
+            <th scope="col">Окружение</th>
+            <th scope="col">Статус</th>
+            <th scope="col">Rollout</th>
+            <th scope="col">Последнее изменение</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (flag of flags.value().items; track flag.id) {
+            <tr>
+              <th class="flag-name" scope="row">
+                <span class="block font-semibold">{{ flag.name }}</span>
+                <code class="mt-1 block text-accent">{{ flag.key }}</code>
+                @if (flag.description) {
+                  <span class="flag-details mt-1 block">{{
+                    flag.description
+                  }}</span>
+                }
+              </th>
+              <td>{{ flag.environment }}</td>
+              <td>{{ flag.enabled ? 'Включён' : 'Выключен' }}</td>
+              <td class="tabular-nums">{{ flag.rolloutPercentage }}%</td>
+              <td class="whitespace-nowrap tabular-nums">
+                <time [attr.datetime]="flag.updatedAtUtc">
+                  {{ flag.updatedAtUtc | date: 'dd.MM.yyyy, HH:mm' }}
+                </time>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

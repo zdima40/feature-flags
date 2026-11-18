@@ -1,0 +1,40 @@
+.table-scroll:focus-visible {
+  outline: 2px solid var(--tui-border-focus);
+  outline-offset: 3px;
+}
+
+table {
+  width: 100%;
+  min-width: 44rem;
+  border-collapse: collapse;
+  text-align: start;
+}
+
+th,
+td {
+  padding: 0.875rem 1rem;
+  text-align: start;
+}
+
+thead {
+  background: var(--tui-background-base-alt);
+}
+
+tbody tr {
+  border-top: 1px solid #495057;
+}
+
+.flag-name {
+  width: 38%;
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+  font-weight: normal;
+}
+
+.flag-details {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--tui-text-secondary);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
