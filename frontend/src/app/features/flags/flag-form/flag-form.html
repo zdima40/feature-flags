@@ -3,7 +3,21 @@
     {{ id() ? 'Редактирование флага' : 'Создание флага' }}
   </h2>
 
-  @if (flag.isLoading()) {
+  <div role="status">
+    @if (confirmation(); as message) {
+      <p class="text-accent">{{ message }}</p>
+    }
+  </div>
+
+  @if (createdFlagId(); as savedId) {
+    <a
+      tuiLink
+      [routerLink]="['/flags', savedId, 'edit']"
+      [info]="form.controls.environment.value"
+    >
+      Перейти к редактированию
+    </a>
+  } @else if (flag.isLoading()) {
     <p role="status">Загружаем флаг…</p>
   } @else if (flag.status() === 'error') {
     <p class="field-error" role="alert">Не удалось загрузить флаг.</p>
@@ -22,79 +36,155 @@
   } @else {
     @let fields = form.controls;
     @let environmentFields = settings[fields.environment.value].controls;
-    <form class="mt-5 grid gap-5" [formGroup]="form">
-      <div class="grid gap-1.5">
-        <label for="flag-name">Название</label>
-        <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-          <input tuiTextfield id="flag-name" formControlName="name" required />
-        </tui-textfield>
-      </div>
-      <div class="grid gap-1.5">
-        <label for="flag-key">Ключ</label>
-        <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-          <input
-            tuiTextfield
-            id="flag-key"
-            formControlName="key"
-            [required]="!id()"
-            aria-describedby="flag-key-hint"
-          />
-        </tui-textfield>
-        <span id="flag-key-hint" class="field-hint text-sm">
-          @if (id()) {
-            Ключ зафиксирован при создании флага.
-          } @else {
-            Латинские буквы, цифры, дефис и подчёркивание.
-          }
-        </span>
-      </div>
-      <div class="grid gap-1.5">
-        <label for="flag-description">Описание</label>
-        <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-          <textarea
-            tuiTextarea
-            id="flag-description"
-            formControlName="description"
-            [minRows]="3"
-            [maxRows]="8"
-          ></textarea>
-        </tui-textfield>
-      </div>
+    @let nameInvalid = fields.name.touched && fields.name.invalid;
+    @let keyInvalid = fields.key.touched && fields.key.invalid;
+    @let rolloutInvalid =
+      environmentFields.rolloutPercentage.touched &&
+      environmentFields.rolloutPercentage.invalid;
+    <form
+      class="mt-5"
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      [attr.aria-busy]="saving()"
+    >
       <fieldset
-        class="border-divider m-0 grid min-w-0 gap-4 rounded-xl border p-4"
+        class="m-0 grid min-w-0 gap-5 border-0 p-0"
+        [disabled]="saving()"
       >
-        <legend class="px-1 font-semibold">Настройки окружения</legend>
         <div class="grid gap-1.5">
-          <label for="flag-environment">Окружение</label>
-          <select id="flag-environment" formControlName="environment">
-            @for (environment of environments; track environment) {
-              <option [value]="environment">{{ environment }}</option>
+          <label for="flag-name">Название</label>
+          <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+            <input
+              tuiTextfield
+              id="flag-name"
+              formControlName="name"
+              required
+              [attr.aria-invalid]="nameInvalid"
+              [attr.aria-describedby]="nameInvalid ? 'flag-name-error' : null"
+            />
+          </tui-textfield>
+          @if (nameInvalid) {
+            <span id="flag-name-error" class="field-error text-sm"
+              >Введите название флага.</span
+            >
+          }
+        </div>
+        <div class="grid gap-1.5">
+          <label for="flag-key">Ключ</label>
+          <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+            <input
+              tuiTextfield
+              id="flag-key"
+              formControlName="key"
+              [required]="!id()"
+              [attr.aria-invalid]="keyInvalid"
+              [attr.aria-describedby]="
+                keyInvalid ? 'flag-key-hint flag-key-error' : 'flag-key-hint'
+              "
+            />
+          </tui-textfield>
+          <span id="flag-key-hint" class="field-hint text-sm">
+            @if (id()) {
+              Ключ зафиксирован при создании флага.
+            } @else {
+              Латинские буквы, цифры, дефис и подчёркивание.
             }
-          </select>
-        </div>
-        <div class="flex items-center gap-2">
-          <input
-            tuiSwitch
-            id="flag-enabled"
-            type="checkbox"
-            [formControl]="environmentFields.enabled"
-            [showIcons]="false"
-          />
-          <label for="flag-enabled">Флаг включён</label>
+          </span>
+          @if (keyInvalid) {
+            <span id="flag-key-error" class="field-error text-sm">
+              Введите ключ в указанном формате.
+            </span>
+          }
         </div>
         <div class="grid gap-1.5">
-          <label for="flag-rollout">Rollout (%)</label>
-          <input
-            id="flag-rollout"
-            type="number"
-            min="0"
-            max="100"
-            step="1"
-            required
-            [formControl]="environmentFields.rolloutPercentage"
-          />
+          <label for="flag-description">Описание</label>
+          <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+            <textarea
+              tuiTextarea
+              id="flag-description"
+              formControlName="description"
+              [minRows]="3"
+              [maxRows]="8"
+            ></textarea>
+          </tui-textfield>
+        </div>
+        <fieldset
+          class="border-divider m-0 grid min-w-0 gap-4 rounded-xl border p-4"
+        >
+          <legend class="px-1 font-semibold">Настройки окружения</legend>
+          <div class="grid gap-1.5">
+            <label for="flag-environment">Окружение</label>
+            <select id="flag-environment" formControlName="environment">
+              @for (environment of environments; track environment) {
+                <option [value]="environment">{{ environment }}</option>
+              }
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <input
+              tuiSwitch
+              id="flag-enabled"
+              type="checkbox"
+              [formControl]="environmentFields.enabled"
+              [showIcons]="false"
+            />
+            <label for="flag-enabled">Флаг включён</label>
+          </div>
+          <div class="grid gap-1.5">
+            <label for="flag-rollout">Rollout (%)</label>
+            <input
+              id="flag-rollout"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              required
+              [formControl]="environmentFields.rolloutPercentage"
+              [attr.aria-invalid]="rolloutInvalid"
+              [attr.aria-describedby]="
+                rolloutInvalid ? 'flag-rollout-error' : null
+              "
+            />
+            @if (rolloutInvalid) {
+              <span id="flag-rollout-error" class="field-error text-sm"
+                >Введите целое число от 0 до 100.</span
+              >
+            }
+          </div>
+          @if (id()) {
+            <p class="field-hint m-0 text-sm">
+              При сохранении обновятся общие поля и настройки выбранного
+              окружения.
+            </p>
+          } @else {
+            <p class="field-hint m-0 text-sm">
+              В остальных окружениях новый флаг будет выключен с rollout 0%.
+            </p>
+          }
+        </fieldset>
+        <div class="flex flex-wrap gap-3">
+          <button tuiButton size="m" type="submit">Сохранить</button>
+          <button
+            tuiButton
+            appearance="outline"
+            size="m"
+            type="button"
+            (click)="cancel()"
+          >
+            Отмена
+          </button>
         </div>
       </fieldset>
     </form>
+    <div role="alert">
+      @for (message of errors(); track message) {
+        <p class="field-error mb-0">{{ message }}</p>
+      }
+    </div>
+    <div role="status">
+      @if (saving()) {
+        <p>Сохраняем флаг…</p>
+      }
+    </div>
   }
 </section>

@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
+  CreateFlagRequest,
   FlagEnvironment,
   FlagListItem,
   FlagListQuery,
   FlagResponse,
   PageResponse,
+  UpdateFlagRequest,
 } from '../models/flag.model';
 
 @Service()
@@ -28,13 +30,18 @@ export class FlagsApiService {
     return this.http.get<FlagResponse>(`/api/flags/${encodeURIComponent(id)}`);
   }
 
-  setEnabled(id: string, environment: FlagEnvironment, enabled: boolean) {
+  create(request: CreateFlagRequest) {
+    return this.http.post<FlagResponse>('/api/flags', request);
+  }
+
+  update(id: string, request: UpdateFlagRequest) {
     return this.http.patch<FlagResponse>(
       `/api/flags/${encodeURIComponent(id)}`,
-      {
-        environment,
-        enabled,
-      },
+      request,
     );
+  }
+
+  setEnabled(id: string, environment: FlagEnvironment, enabled: boolean) {
+    return this.update(id, { environment, enabled });
   }
 }

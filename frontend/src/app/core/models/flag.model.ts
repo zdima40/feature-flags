@@ -37,6 +37,18 @@ export interface FlagResponse {
   environments: FlagEnvironmentSettings[];
 }
 
+export interface UpdateFlagRequest {
+  name?: string;
+  description?: string | null;
+  environment?: FlagEnvironment;
+  enabled?: boolean;
+  rolloutPercentage?: number;
+}
+
+export interface CreateFlagRequest extends Required<UpdateFlagRequest> {
+  key: string;
+}
+
 export interface PageResponse<T> {
   items: T[];
   totalCount: number;
