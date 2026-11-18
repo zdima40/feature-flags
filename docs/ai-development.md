@@ -19,8 +19,26 @@
 | E2E                   | `752493d`                                             | [Сценарии Playwright](../frontend/e2e/flags.spec.ts) через Angular CLI и временную SQLite |
 | Доступность           | `26e520b`                                             | [Axe и клавиатурный сценарий](../frontend/e2e/accessibility.spec.ts) на 1440 и 390 px     |
 | CI                    | `b33aa30`                                             | [GitHub Actions](../.github/workflows/ci.yml) для push и pull request                     |
+| Документация          | `f0e4d12`                                             | [README](../README.md), контракт API и журнал разработки                                  |
 
 ## Исправления по результатам проверок
 
 - Уже запущенный локальный API удерживал файлы сборки Debug на Windows. E2E использует Release и отдельные порты 4210 и 5165, чтобы запускаться рядом с обычным профилем разработки.
 - В Chromium поля названия, ключа и поиска отображались как поля браузера. Переход на директиву `tuiInput` восстановил размеры, цвета и индикаторы фокуса Taiga UI. Повторная проверка включала отображение ошибок валидации формы.
+
+## Проверки 18 ноября 2026 года
+
+| Команды                                                                                                                                      | Результат                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm ci`, `npm run build`, `npm run lint`, `npm run format:check`, `npm run typecheck:e2e`                                                   | Прошли                                                                                                                                                |
+| `npm run test:ci`                                                                                                                            | 27 тестов Vitest прошли                                                                                                                               |
+| `npm run e2e`                                                                                                                                | 5 тестов Chromium прошли, включая два прогона axe и клавиатурной навигации                                                                            |
+| `dotnet restore backend/Rollout.slnx --locked-mode`, `dotnet build backend/Rollout.slnx --configuration Release --no-restore`                | Прошли                                                                                                                                                |
+| `dotnet test backend/Rollout.slnx --configuration Release --no-build`, `dotnet format backend/Rollout.slnx --verify-no-changes --no-restore` | 29 тестов прошли, форматирование проверено                                                                                                            |
+| `actionlint .github/workflows/ci.yml`                                                                                                        | Прошёл. Контрольное падение Playwright локально создало HTML-отчёт, `trace.zip` и PNG. Для запуска workflow и загрузки артефактов нужен GitHub remote |
+
+На отдельном локальном запуске Angular и API с временной SQLite создан флаг `local-rollout-smoke`. В Production rollout изменён с 0% до 25%, затем до 60%, а статус — с выключенного на включённый. После перезагрузки страницы Production показывал 60% и включённый статус, Development и Staging показывали 0% и выключенный статус. В истории подтверждены четыре события с прежними и новыми значениями.
+
+Список, форма и история визуально проверены по снимкам Chromium на 1440 и 390 px. Клавиши Tab, Shift+Tab, Space и Enter отправлялись через Playwright. Подтверждены видимый фокус, порядок переходов и доступ к ссылке истории в прокручиваемой таблице на узком экране. В этих сценариях нет диалогов.
+
+Angular сообщает о размере начального бандла 508,85 кБ при пороге предупреждения 500 кБ. В логах dev-сервера Chromium также появлялось предупреждение `ResizeObserver loop completed with undelivered notifications`. `npm audit` показывает ранее согласованное замечание к `picomatch` 4.0.7 и его цепочкам зависимостей. [GHSA-fc5q-39xc-vjpf](https://github.com/advisories/GHSA-fc5q-39xc-vjpf)
