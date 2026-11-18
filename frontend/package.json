@@ -6,7 +6,11 @@
   "scripts": {
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test"
+    "lint": "ng lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "ng test",
+    "test:ci": "ng test --watch=false"
   },
   "engines": {
     "node": "24.18.0"

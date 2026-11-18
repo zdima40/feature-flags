@@ -1,1 +1,36 @@
-/* You can add global styles to this file, and also import other style files */
+@layer theme, utilities;
+/* Preserve native spacing for content projected into Taiga UI components. */
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+@theme inline {
+  --color-accent: var(--tui-text-action);
+  --color-divider: #495057;
+}
+
+:root {
+  --rollout-background: #212529;
+  color-scheme: dark;
+  background: var(--rollout-background);
+}
+
+body {
+  margin: 0;
+}
+
+tui-root[tuiTheme='dark'] {
+  --tui-background-base: var(--rollout-background);
+  --tui-background-base-alt: #343a40;
+  --tui-background-elevation-1: var(--tui-background-base-alt);
+  --tui-background-elevation-2: var(--tui-background-base-alt);
+  --tui-background-elevation-3: var(--tui-background-base-alt);
+  --tui-background-accent-1: #22d3ee;
+  --tui-background-accent-1-hover: #67e8f9;
+  --tui-background-accent-1-pressed: #06b6d4;
+  --tui-border-normal: #7d8893;
+  --tui-border-focus: #67e8f9;
+  --tui-text-primary: #f8f9fa;
+  --tui-text-primary-on-accent-1: var(--rollout-background);
+  --tui-text-action: #67e8f9;
+  --tui-text-action-hover: #a5f3fc;
+}

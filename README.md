@@ -4,13 +4,13 @@ Rollout — панель управления feature flags. API хранит н
 
 ## Локальный запуск frontend
 
-Используйте Node.js 24.18.0 и npm 11.16.0. Из корня репозитория запустите API в отдельном терминале:
+Используйте Node.js 24.18.0 и npm 11.16.0. Первая команда запускает API из корня репозитория в отдельном терминале.
 
 ```sh
 dotnet run --project backend/Rollout.Api --launch-profile http
 ```
 
-Во втором терминале выполните:
+Во втором терминале установите зависимости и запустите Angular.
 
 ```sh
 cd frontend
@@ -19,6 +19,19 @@ npm start
 ```
 
 Angular доступен на [http://localhost:4200](http://localhost:4200). Dev-сервер направляет запросы `/api/*` на `http://localhost:5155`, включая вложенные маршруты. Для проверки откройте [список флагов через прокси](http://localhost:4200/api/flags).
+
+## Проверки frontend
+
+Эти команды запускают сборку, линтер, проверку форматирования и тесты из `frontend/`.
+
+```sh
+npm run build
+npm run lint
+npm run format:check
+npm run test:ci
+```
+
+`npm test` запускает Vitest в режиме наблюдения, а `npm run format` применяет форматирование. Сборка сначала подключает CSS темы Taiga UI, затем графитовую палитру Rollout и слои Tailwind. Preflight отключён, чтобы сохранить стандартные отступы обычного текста в диалогах.
 
 ## Локальный запуск backend
 

@@ -6,10 +6,6 @@
 
 ## 1. Frontend
 
-### Каркас
-
-- [ ] Подключить графитовую тему Taiga UI с cyan-акцентом и Tailwind CSS для адаптивной вёрстки. Проверить порядок стилей и влияние Preflight на базовые компоненты. Настроить Angular ESLint, Prettier и Vitest.
-
 ### Список флагов
 
 Для подключения нужны `GET /api/flags` и `PATCH /api/flags/{id}`.
