@@ -29,8 +29,8 @@ export const routes: Routes = [
     path: 'flags/:id/history',
     title: 'История флага',
     loadComponent: () =>
-      import('./features/flags/flag-page-pending').then(
-        (module) => module.FlagPagePending,
+      import('./features/flags/flag-history/flag-history').then(
+        (module) => module.FlagHistory,
       ),
   },
 ];

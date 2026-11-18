@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
 import {
   CreateFlagRequest,
+  FlagAuditEvent,
   FlagEnvironment,
   FlagListItem,
   FlagListQuery,
@@ -28,6 +29,12 @@ export class FlagsApiService {
 
   get(id: string) {
     return this.http.get<FlagResponse>(`/api/flags/${encodeURIComponent(id)}`);
+  }
+
+  history(id: string) {
+    return this.http.get<PageResponse<FlagAuditEvent>>(
+      `/api/flags/${encodeURIComponent(id)}/history`,
+    );
   }
 
   create(request: CreateFlagRequest) {

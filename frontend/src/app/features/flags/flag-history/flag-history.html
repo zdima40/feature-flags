@@ -1,0 +1,51 @@
+<section class="mt-7" aria-labelledby="history-heading">
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 id="history-heading" class="m-0 text-2xl font-semibold">
+      История флага
+    </h2>
+    <a tuiLink routerLink="/flags">К списку флагов</a>
+  </div>
+
+  @if (events().length) {
+    <div
+      class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
+      role="region"
+      aria-label="Таблица событий"
+      tabindex="0"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Дата и время</th>
+            <th scope="col">Поле</th>
+            <th scope="col">Прежнее значение</th>
+            <th scope="col">Новое значение</th>
+            <th scope="col">Актор</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (event of events(); track event.id) {
+            <tr>
+              <td class="whitespace-nowrap tabular-nums">
+                <time [attr.datetime]="event.changedAtUtc">
+                  {{ event.localDateTime }}
+                </time>
+              </td>
+              <th scope="row">
+                {{ event.label }}
+                @if (event.environment) {
+                  <small class="environment mt-1 block">{{
+                    event.environment
+                  }}</small>
+                }
+              </th>
+              <td class="audit-value">{{ event.oldValue ?? '—' }}</td>
+              <td class="audit-value">{{ event.newValue ?? '—' }}</td>
+              <td>{{ event.actor }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

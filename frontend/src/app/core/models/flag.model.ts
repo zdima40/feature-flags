@@ -49,6 +49,17 @@ export interface CreateFlagRequest extends Required<UpdateFlagRequest> {
   key: string;
 }
 
+export interface FlagAuditEvent {
+  id: string;
+  featureFlagId: string;
+  environment: FlagEnvironment | null;
+  field: string;
+  oldValue: string | null;
+  newValue: string | null;
+  actor: string;
+  changedAtUtc: string;
+}
+
 export interface PageResponse<T> {
   items: T[];
   totalCount: number;
