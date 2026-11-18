@@ -8,16 +8,16 @@
 
   <div role="status">
     @if (history.isLoading()) {
-      <p class="mt-4 mb-0">Загружаем историю…</p>
+      <tui-loader class="mt-4" textContent="Загружаем историю…" />
     } @else if (history.hasValue() && history.value().totalCount === 0) {
-      <p class="mt-4 mb-0">Событий пока нет.</p>
+      <div tuiNotification appearance="neutral" icon="" class="mt-4">
+        Событий пока нет.
+      </div>
     }
   </div>
   @if (history.status() === 'error') {
-    <div class="mt-5 flex flex-wrap items-center gap-3">
-      <p class="load-error m-0" role="alert">
-        Не удалось загрузить историю флага.
-      </p>
+    <div tuiNotification appearance="negative" icon="" class="mt-5">
+      <p class="m-0" role="alert">Не удалось загрузить историю флага.</p>
       <button
         tuiButton
         appearance="outline"
@@ -37,25 +37,25 @@
       aria-label="Таблица событий"
       tabindex="0"
     >
-      <table>
+      <table tuiTable class="w-full min-w-[46rem]">
         <thead>
           <tr>
-            <th scope="col">Дата и время</th>
-            <th scope="col">Поле</th>
-            <th scope="col">Прежнее значение</th>
-            <th scope="col">Новое значение</th>
-            <th scope="col">Актор</th>
+            <th tuiTh scope="col">Дата и время</th>
+            <th tuiTh scope="col">Поле</th>
+            <th tuiTh scope="col">Прежнее значение</th>
+            <th tuiTh scope="col">Новое значение</th>
+            <th tuiTh scope="col">Актор</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody tuiTbody>
           @for (event of events(); track event.id) {
             <tr>
-              <td class="whitespace-nowrap tabular-nums">
+              <td tuiTd class="whitespace-nowrap tabular-nums">
                 <time [attr.datetime]="event.changedAtUtc">
                   {{ event.localDateTime }}
                 </time>
               </td>
-              <th scope="row">
+              <th tuiTd scope="row">
                 {{ event.label }}
                 @if (event.environment) {
                   <small class="environment mt-1 block">{{
@@ -63,9 +63,9 @@
                   }}</small>
                 }
               </th>
-              <td class="audit-value">{{ event.oldValue ?? '—' }}</td>
-              <td class="audit-value">{{ event.newValue ?? '—' }}</td>
-              <td>{{ event.actor }}</td>
+              <td tuiTd class="audit-value">{{ event.oldValue ?? '—' }}</td>
+              <td tuiTd class="audit-value">{{ event.newValue ?? '—' }}</td>
+              <td tuiTd>{{ event.actor }}</td>
             </tr>
           }
         </tbody>
@@ -82,37 +82,21 @@
         Всего событий: {{ history.value().totalCount }}
       }
     </span>
-    <div class="flex items-center gap-2">
-      <button
-        tuiButton
-        appearance="outline"
-        size="s"
-        type="button"
-        [attr.aria-disabled]="
-          page() <= 1 || history.isLoading() || !history.hasValue()
-        "
-        (click)="changePage(page() - 1)"
-      >
-        Назад
-      </button>
-      <span class="px-1 tabular-nums" aria-live="polite">
-        Страница {{ page() }}
-        @if (history.hasValue()) {
-          из {{ pageCount() }}
-        }
-      </span>
-      <button
-        tuiButton
-        appearance="outline"
-        size="s"
-        type="button"
-        [attr.aria-disabled]="
-          page() >= pageCount() || history.isLoading() || !history.hasValue()
-        "
-        (click)="changePage(page() + 1)"
-      >
-        Вперёд
-      </button>
-    </div>
+    <fieldset
+      class="m-0 min-w-0 border-0 p-0"
+      [disabled]="history.isLoading() || !history.hasValue()"
+    >
+      <tui-pagination
+        size="m"
+        [length]="pageCount()"
+        [index]="page() - 1"
+        (indexChange)="changePage($event + 1)"
+      />
+    </fieldset>
+    <span class="sr-only" aria-live="polite">
+      @if (history.hasValue() && !history.isLoading()) {
+        Страница {{ page() }} из {{ pageCount() }}
+      }
+    </span>
   </nav>
 </section>

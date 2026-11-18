@@ -122,7 +122,7 @@ test('searches by name and key, filters by environment and status, and paginates
   await expect(rows.last()).toContainText(`${prefix}-20`);
 
   const status = page.getByLabel('Статус', { exact: true });
-  await status.selectOption('true');
+  await status.selectOption({ label: 'Включённые' });
   await expect(page.getByText('Страница 1 из 1')).toBeVisible();
   await expect(
     page.getByText('Всего флагов: 1', { exact: true }),
@@ -134,7 +134,7 @@ test('searches by name and key, filters by environment and status, and paginates
   await expect(
     page.getByText('По заданным фильтрам флаги не найдены.'),
   ).toBeVisible();
-  await status.selectOption('false');
+  await status.selectOption({ label: 'Выключенные' });
   await expect(page.getByText('Всего флагов: 21')).toBeVisible();
   await next.click();
   await expect(page.getByText('Страница 2 из 2')).toBeVisible();

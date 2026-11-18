@@ -99,9 +99,10 @@ describe('FlagHistory', () => {
     await harness.fixture.whenStable();
 
     const page = harness.routeNativeElement!;
-    const [previous, next] =
-      page.querySelectorAll<HTMLButtonElement>('nav button');
-    expect(previous.getAttribute('aria-disabled')).toBe('true');
+    const buttons = page.querySelectorAll<HTMLButtonElement>('nav button');
+    const previous = buttons[0];
+    const next = buttons[buttons.length - 1];
+    expect(previous.disabled).toBe(true);
     expect(page.textContent).toContain('Всего событий: 21');
     expect(page.textContent).toMatch(/Страница 1\s+из 2/);
 
@@ -112,7 +113,7 @@ describe('FlagHistory', () => {
     await harness.fixture.whenStable();
     expect(page.querySelector('tbody')?.textContent).toContain('Флаг создан');
     expect(page.textContent).toMatch(/Страница 2\s+из 2/);
-    expect(next.getAttribute('aria-disabled')).toBe('true');
+    expect(next.disabled).toBe(true);
 
     previous.click();
     historyRequest().flush(result([updated], 21));

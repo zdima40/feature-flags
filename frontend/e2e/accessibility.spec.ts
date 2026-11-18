@@ -106,11 +106,15 @@ for (const width of [1440, 390]) {
 
       await page.goto('/flags');
       const search = page.getByRole('searchbox', { name: 'Поиск' });
+      const environment = page.getByRole('combobox', { name: 'Окружение' });
+      const status = page.getByRole('combobox', { name: 'Статус' });
       const history = page.getByRole('link', {
         name: `История флага «${key}»`,
       });
       await expect(history).toBeVisible();
       await checkTextfield(search);
+      await checkTextfield(environment);
+      await checkTextfield(status);
       await checkPage(page);
       await tabTo(page, page.getByRole('link', { name: 'Создать флаг' }));
       await tabTo(page, search);
@@ -118,8 +122,8 @@ for (const width of [1440, 390]) {
       await expect(
         page.getByText('Всего флагов: 1', { exact: true }),
       ).toBeVisible();
-      await tabTo(page, page.getByRole('combobox', { name: 'Окружение' }));
-      await tabTo(page, page.getByRole('combobox', { name: 'Статус' }));
+      await tabTo(page, environment);
+      await tabTo(page, status);
       await tabTo(page, page.getByRole('region', { name: 'Таблица флагов' }));
       await tabTo(
         page,

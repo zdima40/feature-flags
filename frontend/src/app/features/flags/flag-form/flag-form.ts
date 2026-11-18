@@ -19,7 +19,15 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TuiButton, tuiIconsProvider, TuiInput, TuiLink } from '@taiga-ui/core';
+import {
+  TuiButton,
+  TuiError,
+  tuiIconsProvider,
+  TuiInput,
+  TuiLink,
+  TuiLoader,
+  TuiNotification,
+} from '@taiga-ui/core';
 import { TuiInputNumber, TuiSwitch, TuiTabs, TuiTextarea } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
@@ -77,6 +85,9 @@ function saveErrors(error: unknown): string[] {
     TuiTextarea,
     TuiInput,
     TuiInputNumber,
+    TuiError,
+    TuiLoader,
+    TuiNotification,
   ],
   providers: [
     tuiIconsProvider({

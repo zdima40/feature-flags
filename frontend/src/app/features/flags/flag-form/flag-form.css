@@ -1,7 +1,3 @@
 .field-hint {
   color: var(--tui-text-secondary);
 }
-
-.field-error {
-  color: var(--tui-text-negative);
-}

@@ -5,7 +5,9 @@
 
   <div role="status">
     @if (confirmation(); as message) {
-      <p class="text-accent">{{ message }}</p>
+      <div tuiNotification appearance="positive" icon="" class="my-4">
+        {{ message }}
+      </div>
     }
   </div>
 
@@ -17,9 +19,19 @@
       >К списку флагов</a
     >
   } @else if (flag.isLoading()) {
-    <p role="status">Загружаем флаг…</p>
+    <div role="status" class="mt-4">
+      <tui-loader textContent="Загружаем флаг…" />
+    </div>
   } @else if (flag.status() === 'error') {
-    <p class="field-error" role="alert">Не удалось загрузить флаг.</p>
+    <div
+      tuiNotification
+      appearance="negative"
+      icon=""
+      role="alert"
+      class="my-4"
+    >
+      Не удалось загрузить флаг.
+    </div>
     <div class="flex flex-wrap items-center gap-3">
       <button
         tuiButton
@@ -47,8 +59,8 @@
         [disabled]="saving()"
       >
         <div class="grid gap-1.5">
-          <label for="flag-name">Название</label>
           <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+            <label tuiLabel for="flag-name">Название</label>
             <input
               tuiInput
               id="flag-name"
@@ -59,14 +71,12 @@
             />
           </tui-textfield>
           @if (nameInvalid) {
-            <span id="flag-name-error" class="field-error text-sm"
-              >Введите название флага.</span
-            >
+            <tui-error id="flag-name-error" error="Введите название флага." />
           }
         </div>
         <div class="grid gap-1.5">
-          <label for="flag-key">Ключ</label>
           <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+            <label tuiLabel for="flag-key">Ключ</label>
             <input
               tuiInput
               id="flag-key"
@@ -86,14 +96,15 @@
             }
           </span>
           @if (keyInvalid) {
-            <span id="flag-key-error" class="field-error text-sm">
-              Введите ключ в указанном формате.
-            </span>
+            <tui-error
+              id="flag-key-error"
+              error="Введите ключ в указанном формате."
+            />
           }
         </div>
         <div class="grid gap-1.5">
-          <label for="flag-description">Описание</label>
           <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+            <label tuiLabel for="flag-description">Описание</label>
             <textarea
               tuiTextarea
               id="flag-description"
@@ -139,7 +150,7 @@
                   environmentFields.rolloutPercentage.touched &&
                   environmentFields.rolloutPercentage.invalid;
                 <div class="grid gap-4">
-                  <div class="flex items-center gap-2">
+                  <label tuiLabel for="flag-enabled" class="items-center">
                     <input
                       tuiSwitch
                       id="flag-enabled"
@@ -147,14 +158,14 @@
                       [formControl]="environmentFields.enabled"
                       [showIcons]="false"
                     />
-                    <label for="flag-enabled">Флаг включён</label>
-                  </div>
+                    Флаг включён
+                  </label>
                   <div class="grid gap-1.5">
-                    <label for="flag-rollout">Rollout (%)</label>
                     <tui-textfield
                       tuiTextfieldSize="m"
                       [tuiTextfieldCleaner]="false"
                     >
+                      <label tuiLabel for="flag-rollout">Rollout (%)</label>
                       <input
                         tuiInputNumber
                         id="flag-rollout"
@@ -171,9 +182,10 @@
                       />
                     </tui-textfield>
                     @if (rolloutInvalid) {
-                      <span id="flag-rollout-error" class="field-error text-sm"
-                        >Введите целое число от 0 до 100.</span
-                      >
+                      <tui-error
+                        id="flag-rollout-error"
+                        error="Введите целое число от 0 до 100."
+                      />
                     }
                   </div>
                 </div>
@@ -197,12 +209,14 @@
     </form>
     <div role="alert">
       @for (message of errors(); track message) {
-        <p class="field-error mb-0">{{ message }}</p>
+        <div tuiNotification appearance="negative" icon="" class="mt-4">
+          {{ message }}
+        </div>
       }
     </div>
     <div role="status">
       @if (saving()) {
-        <p>Сохраняем флаг…</p>
+        <tui-loader class="mt-4" textContent="Сохраняем флаг…" />
       }
     </div>
   }

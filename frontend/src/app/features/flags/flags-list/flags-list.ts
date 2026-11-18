@@ -14,8 +14,21 @@ import {
 } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TuiButton, TuiInput, TuiLink } from '@taiga-ui/core';
-import { TuiSwitch } from '@taiga-ui/kit';
+import { TuiTable } from '@taiga-ui/addon-table';
+import {
+  TuiButton,
+  TuiInput,
+  TuiLink,
+  TuiLoader,
+  TuiNotification,
+} from '@taiga-ui/core';
+import {
+  TuiChevron,
+  TuiLineClamp,
+  TuiPagination,
+  TuiSelect,
+  TuiSwitch,
+} from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
 import {
@@ -26,6 +39,11 @@ import {
 } from '../../../core/models/flag.model';
 
 const PAGE_SIZE = 20;
+const STATUS_FILTERS = {
+  'Все статусы': undefined,
+  Включённые: true,
+  Выключенные: false,
+} as const;
 
 function lastPage(result: PageResponse<FlagListItem>): number {
   return Math.max(1, Math.ceil(result.totalCount / result.pageSize));
@@ -40,6 +58,13 @@ function lastPage(result: PageResponse<FlagListItem>): number {
     TuiLink,
     TuiSwitch,
     TuiInput,
+    TuiChevron,
+    TuiLineClamp,
+    TuiLoader,
+    TuiNotification,
+    TuiPagination,
+    TuiSelect,
+    TuiTable,
   ],
   selector: 'app-flags-list',
   styleUrl: './flags-list.css',
@@ -69,7 +94,10 @@ export class FlagsList {
     );
   });
   protected readonly search = signal('');
-  protected readonly enabled = signal<boolean | undefined>(undefined);
+  protected readonly statuses = Object.keys(STATUS_FILTERS);
+  protected readonly status =
+    signal<keyof typeof STATUS_FILTERS>('Все статусы');
+  protected readonly enabled = computed(() => STATUS_FILTERS[this.status()]);
 
   private readonly searchTerm = computed(() => this.search().trim());
   private readonly filters = computed(() => ({

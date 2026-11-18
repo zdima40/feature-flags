@@ -1,7 +1,9 @@
 import { Component, computed, inject, linkedSignal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TuiButton, TuiLink } from '@taiga-ui/core';
+import { TuiTable } from '@taiga-ui/addon-table';
+import { TuiButton, TuiLink, TuiLoader, TuiNotification } from '@taiga-ui/core';
+import { TuiPagination } from '@taiga-ui/kit';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
 
 const FIELD_LABELS = new Map([
@@ -14,7 +16,15 @@ const FIELD_LABELS = new Map([
 const PAGE_SIZE = 20;
 
 @Component({
-  imports: [RouterLink, TuiButton, TuiLink],
+  imports: [
+    RouterLink,
+    TuiButton,
+    TuiLink,
+    TuiLoader,
+    TuiNotification,
+    TuiPagination,
+    TuiTable,
+  ],
   selector: 'app-flag-history',
   styleUrl: './flag-history.css',
   templateUrl: './flag-history.html',

@@ -4,10 +4,10 @@
     <a tuiButton size="m" routerLink="/flags/new">Создать флаг</a>
   </div>
 
-  <div class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+  <div class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_11rem]">
     <div class="grid gap-1.5">
-      <label for="flag-search">Поиск</label>
       <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+        <label tuiLabel for="flag-search">Поиск</label>
         <input
           #searchInput
           tuiInput
@@ -19,71 +19,75 @@
       </tui-textfield>
     </div>
     <div class="grid gap-1.5">
-      <label for="flag-environment">Окружение</label>
-      <select
-        id="flag-environment"
-        [ngModel]="environment()"
-        (ngModelChange)="changeEnvironment($event)"
+      <tui-textfield
+        tuiChevron
+        tuiTextfieldSize="m"
+        [tuiTextfieldCleaner]="false"
       >
-        @for (option of environments; track option) {
-          <option [value]="option">{{ option }}</option>
-        }
-      </select>
+        <label tuiLabel for="flag-environment">Окружение</label>
+        <select
+          tuiSelect
+          id="flag-environment"
+          [items]="environments"
+          [ngModel]="environment()"
+          (ngModelChange)="changeEnvironment($event)"
+        ></select>
+      </tui-textfield>
     </div>
     <div class="grid gap-1.5">
-      <label for="flag-status">Статус</label>
-      <select
-        #statusSelect
-        id="flag-status"
-        (change)="
-          enabled.set(
-            statusSelect.value ? statusSelect.value === 'true' : undefined
-          )
-        "
+      <tui-textfield
+        tuiChevron
+        tuiTextfieldSize="m"
+        [tuiTextfieldCleaner]="false"
       >
-        <option value="">Все статусы</option>
-        <option value="true">Включённые</option>
-        <option value="false">Выключенные</option>
-      </select>
+        <label tuiLabel for="flag-status">Статус</label>
+        <select
+          tuiSelect
+          id="flag-status"
+          [items]="statuses"
+          [ngModel]="status()"
+          (ngModelChange)="status.set($event)"
+        ></select>
+      </tui-textfield>
     </div>
   </div>
 
   <div role="status">
     @if (notice(); as feedback) {
       @if (!feedback.error) {
-        <p class="feedback mt-4 mb-0 text-accent">{{ feedback.message }}</p>
+        <div tuiNotification appearance="positive" icon="" class="mt-4">
+          {{ feedback.message }}
+        </div>
       }
     }
   </div>
   <div role="alert">
     @if (notice(); as feedback) {
       @if (feedback.error) {
-        <p class="feedback flag-error mt-4 mb-0">{{ feedback.message }}</p>
+        <div tuiNotification appearance="negative" icon="" class="mt-4">
+          {{ feedback.message }}
+        </div>
       }
     }
   </div>
 
   <div role="status">
     @if (flags.isLoading()) {
-      <p class="mt-4 mb-0">Загружаем флаги…</p>
+      <tui-loader class="mt-4" textContent="Загружаем флаги…" />
     } @else if (flags.hasValue() && flags.value().items.length === 0) {
-      <p class="feedback mt-5 mb-0">
+      <div tuiNotification appearance="neutral" icon="" class="mt-5">
         @if (enabled() !== undefined || search().trim()) {
           По заданным фильтрам флаги не найдены.
         } @else {
           Флагов пока нет.
         }
-      </p>
+      </div>
     }
   </div>
 
   @if (flags.status() === 'error') {
-    <div
-      class="feedback mt-5 flex flex-wrap items-center justify-between gap-3"
-    >
-      <p class="flag-error m-0" role="alert">
-        Не удалось загрузить список флагов.
-      </p>
+    <div tuiNotification appearance="negative" icon="" class="mt-5">
+      <p class="m-0" role="alert">Не удалось загрузить список флагов.</p>
       <button
         tuiButton
         appearance="outline"
@@ -103,31 +107,34 @@
       aria-label="Таблица флагов"
       tabindex="0"
     >
-      <table>
+      <table tuiTable class="w-full min-w-[53rem]">
         <thead>
           <tr>
-            <th scope="col">Флаг</th>
-            <th scope="col">Окружение</th>
-            <th scope="col">Статус</th>
-            <th scope="col">Rollout</th>
-            <th scope="col">Последнее изменение</th>
-            <th scope="col">Действия</th>
+            <th tuiTh scope="col">Флаг</th>
+            <th tuiTh scope="col">Окружение</th>
+            <th tuiTh scope="col">Статус</th>
+            <th tuiTh scope="col">Rollout</th>
+            <th tuiTh scope="col">Последнее изменение</th>
+            <th tuiTh scope="col">Действия</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody tuiTbody>
           @for (flag of flags.value().items; track flag.id) {
             <tr>
-              <th class="flag-name" scope="row">
+              <th tuiTd class="flag-name" scope="row">
                 <span class="block font-semibold">{{ flag.name }}</span>
                 <code class="mt-1 block text-accent">{{ flag.key }}</code>
                 @if (flag.description) {
-                  <span class="flag-details mt-1 block">{{
-                    flag.description
-                  }}</span>
+                  <tui-line-clamp
+                    class="flag-details mt-1"
+                    [content]="flag.description"
+                    [linesLimit]="2"
+                    [showHint]="false"
+                  />
                 }
               </th>
-              <td>{{ flag.environment }}</td>
-              <td>
+              <td tuiTd>{{ flag.environment }}</td>
+              <td tuiTd>
                 @let pending = saving().has(flagKey(flag));
                 <div class="flex items-center gap-2">
                   <input
@@ -142,18 +149,22 @@
                   <span>{{ flag.enabled ? 'Включён' : 'Выключен' }}</span>
                 </div>
                 @if (pending) {
-                  <span class="mt-1 block text-xs" role="status"
-                    >Сохранение…</span
+                  <span
+                    class="mt-1 flex items-center gap-2 text-xs"
+                    role="status"
                   >
+                    <tui-loader size="xs" aria-hidden="true" />
+                    Сохранение…
+                  </span>
                 }
               </td>
-              <td class="tabular-nums">{{ flag.rolloutPercentage }}%</td>
-              <td class="whitespace-nowrap tabular-nums">
+              <td tuiTd class="tabular-nums">{{ flag.rolloutPercentage }}%</td>
+              <td tuiTd class="whitespace-nowrap tabular-nums">
                 <time [attr.datetime]="flag.updatedAtUtc">
                   {{ flag.updatedAtUtc | date: 'dd.MM.yyyy, HH:mm' }}
                 </time>
               </td>
-              <td>
+              <td tuiTd>
                 <div class="flex flex-wrap gap-x-3 gap-y-1">
                   <a
                     tuiLink
@@ -185,37 +196,21 @@
         Всего флагов: {{ flags.value().totalCount }}
       }
     </span>
-    <div class="flex items-center gap-2">
-      <button
-        tuiButton
-        appearance="outline"
-        size="s"
-        type="button"
-        [attr.aria-disabled]="
-          page() <= 1 || flags.isLoading() || !flags.hasValue()
-        "
-        (click)="changePage(page() - 1)"
-      >
-        Назад
-      </button>
-      <span class="px-1 tabular-nums" aria-live="polite">
-        Страница {{ page() }}
-        @if (flags.hasValue()) {
-          из {{ pageCount() }}
-        }
-      </span>
-      <button
-        tuiButton
-        appearance="outline"
-        size="s"
-        type="button"
-        [attr.aria-disabled]="
-          page() >= pageCount() || flags.isLoading() || !flags.hasValue()
-        "
-        (click)="changePage(page() + 1)"
-      >
-        Вперёд
-      </button>
-    </div>
+    <fieldset
+      class="m-0 min-w-0 border-0 p-0"
+      [disabled]="flags.isLoading() || !flags.hasValue()"
+    >
+      <tui-pagination
+        size="m"
+        [length]="pageCount()"
+        [index]="page() - 1"
+        (indexChange)="changePage($event + 1)"
+      />
+    </fieldset>
+    <span class="sr-only" aria-live="polite">
+      @if (flags.hasValue() && !flags.isLoading()) {
+        Страница {{ page() }} из {{ pageCount() }}
+      }
+    </span>
   </nav>
 </section>

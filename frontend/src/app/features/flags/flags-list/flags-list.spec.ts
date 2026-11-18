@@ -153,7 +153,11 @@ describe('FlagsList', () => {
       value: ' new-checkout ',
       params: { search: 'new-checkout' },
     },
-    { selector: '#flag-status', value: 'false', params: { enabled: 'false' } },
+    {
+      selector: '#flag-status',
+      value: 'Выключенные',
+      params: { enabled: 'false' },
+    },
   ])(
     'resets to page one when $selector changes',
     async ({ selector, value, params }) => {
@@ -190,7 +194,7 @@ describe('FlagsList', () => {
     expect(page.textContent).toContain('Флагов пока нет');
     expect(page.querySelector('table')).toBeNull();
     const next = element<HTMLButtonElement>('nav button:last-child');
-    expect(next.getAttribute('aria-disabled')).toBe('true');
+    expect(next.disabled).toBe(true);
     next.click();
     await fixture.whenStable();
     http.expectNone((request) => request.url === '/api/flags');
@@ -274,7 +278,7 @@ describe('FlagsList', () => {
   it('moves to the last available page if toggling removes a filtered row', async () => {
     listRequest().flush(result([flag]));
     await fixture.whenStable();
-    changeFilter('#flag-status', 'false');
+    changeFilter('#flag-status', 'Выключенные');
     listRequest({ enabled: 'false' }).flush(result([flag], 21));
     await fixture.whenStable();
     element<HTMLButtonElement>('nav button:last-child').click();

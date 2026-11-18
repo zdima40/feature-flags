@@ -1,18 +1,6 @@
-select:focus-visible,
 .table-scroll:focus-visible {
   outline: 2px solid var(--tui-border-focus);
   outline-offset: 3px;
-}
-
-select {
-  min-width: 0;
-  min-height: 2.75rem;
-  padding-inline: 0.75rem;
-  border: 1px solid var(--tui-border-normal);
-  border-radius: var(--tui-radius-m);
-  background: var(--tui-background-base-alt);
-  color: var(--tui-text-primary);
-  font: inherit;
 }
 
 [aria-disabled='true'] {
@@ -24,38 +12,6 @@ select {
   color: var(--tui-text-secondary);
 }
 
-.feedback {
-  padding: 0.875rem 1rem;
-  border: 1px solid #495057;
-  border-radius: 0.75rem;
-  background: var(--tui-background-base-alt);
-}
-
-.flag-error {
-  color: var(--tui-text-negative);
-}
-
-table {
-  width: 100%;
-  min-width: 53rem;
-  border-collapse: collapse;
-  text-align: start;
-}
-
-th,
-td {
-  padding: 0.875rem 1rem;
-  text-align: start;
-}
-
-thead {
-  background: var(--tui-background-base-alt);
-}
-
-tbody tr {
-  border-top: 1px solid #495057;
-}
-
 .flag-name {
   width: 38%;
   max-width: 24rem;
@@ -64,9 +20,5 @@ tbody tr {
 }
 
 .flag-details {
-  display: -webkit-box;
-  overflow: hidden;
   color: var(--tui-text-secondary);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
 }
