@@ -1,23 +1,23 @@
 <section class="mt-7" aria-labelledby="history-heading">
   <div class="flex flex-wrap items-center justify-between gap-3">
     <h2 id="history-heading" class="m-0 text-2xl font-semibold">
-      История флага
+      {{ 'history.heading' | translate }}
     </h2>
-    <a tuiLink routerLink="/flags">К списку флагов</a>
+    <a tuiLink routerLink="/flags">{{ 'common.back' | translate }}</a>
   </div>
 
   <div role="status">
     @if (history.isLoading()) {
-      <tui-loader class="mt-4" textContent="Загружаем историю…" />
+      <tui-loader class="mt-4" [textContent]="'history.loading' | translate" />
     } @else if (history.hasValue() && history.value().totalCount === 0) {
       <div tuiNotification appearance="neutral" icon="" class="mt-4">
-        Событий пока нет.
+        {{ 'history.empty' | translate }}
       </div>
     }
   </div>
   @if (history.status() === 'error') {
     <div tuiNotification appearance="negative" icon="" class="mt-5">
-      <p class="m-0" role="alert">Не удалось загрузить историю флага.</p>
+      <p class="m-0" role="alert">{{ 'history.loadError' | translate }}</p>
       <button
         tuiButton
         appearance="outline"
@@ -25,7 +25,7 @@
         type="button"
         (click)="history.reload()"
       >
-        Повторить
+        {{ 'common.retry' | translate }}
       </button>
     </div>
   }
@@ -34,17 +34,17 @@
     <div
       class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
       role="region"
-      aria-label="Таблица событий"
+      [attr.aria-label]="'history.table' | translate"
       tabindex="0"
     >
       <table tuiTable class="w-full min-w-[46rem]">
         <thead>
           <tr>
-            <th tuiTh scope="col">Дата и время</th>
-            <th tuiTh scope="col">Поле</th>
-            <th tuiTh scope="col">Прежнее значение</th>
-            <th tuiTh scope="col">Новое значение</th>
-            <th tuiTh scope="col">Актор</th>
+            <th tuiTh scope="col">{{ 'history.dateTime' | translate }}</th>
+            <th tuiTh scope="col">{{ 'history.field' | translate }}</th>
+            <th tuiTh scope="col">{{ 'history.oldValue' | translate }}</th>
+            <th tuiTh scope="col">{{ 'history.newValue' | translate }}</th>
+            <th tuiTh scope="col">{{ 'history.actor' | translate }}</th>
           </tr>
         </thead>
         <tbody tuiTbody>
@@ -56,15 +56,29 @@
                 </time>
               </td>
               <th tuiTd scope="row">
-                {{ event.label }}
+                {{
+                  event.labelKey ? (event.labelKey | translate) : event.field
+                }}
                 @if (event.environment) {
                   <small class="environment mt-1 block">{{
                     event.environment
                   }}</small>
                 }
               </th>
-              <td tuiTd class="audit-value">{{ event.oldValue ?? '—' }}</td>
-              <td tuiTd class="audit-value">{{ event.newValue ?? '—' }}</td>
+              <td tuiTd class="audit-value">
+                @if (statusKey(event.field, event.oldValue); as key) {
+                  {{ key | translate }}
+                } @else {
+                  {{ event.oldValue ?? '—' }}
+                }
+              </td>
+              <td tuiTd class="audit-value">
+                @if (statusKey(event.field, event.newValue); as key) {
+                  {{ key | translate }}
+                } @else {
+                  {{ event.newValue ?? '—' }}
+                }
+              </td>
               <td tuiTd>{{ event.actor }}</td>
             </tr>
           }
@@ -75,11 +89,11 @@
 
   <nav
     class="mt-4 flex flex-wrap items-center justify-between gap-3"
-    aria-label="Страницы истории"
+    [attr.aria-label]="'history.pages' | translate"
   >
     <span>
       @if (history.hasValue()) {
-        Всего событий: {{ history.value().totalCount }}
+        {{ 'history.total' | translate: { count: history.value().totalCount } }}
       }
     </span>
     <fieldset
@@ -95,7 +109,7 @@
     </fieldset>
     <span class="sr-only" aria-live="polite">
       @if (history.hasValue() && !history.isLoading()) {
-        Страница {{ page() }} из {{ pageCount() }}
+        {{ 'common.page' | translate: { current: page(), total: pageCount() } }}
       }
     </span>
   </nav>

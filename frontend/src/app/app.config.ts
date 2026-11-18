@@ -2,22 +2,45 @@ import { provideHttpClient } from '@angular/common/http';
 import {
   ApplicationConfig,
   computed,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
+  signal,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { provideTaiga, tuiIconsProvider } from '@taiga-ui/core';
-import { TUI_PAGINATION_TEXTS } from '@taiga-ui/kit';
+import { provideRouter, TitleStrategy } from '@angular/router';
+import { provideTaiga, TUI_DARK_MODE, tuiIconsProvider } from '@taiga-ui/core';
+import { TUI_LANGUAGE } from '@taiga-ui/i18n';
+import { TUI_ENGLISH_LANGUAGE } from '@taiga-ui/i18n/languages/english';
+import { TUI_RUSSIAN_LANGUAGE } from '@taiga-ui/i18n/languages/russian';
 import { routes } from './app.routes';
+import { Language, translationProviders } from './core/i18n/language';
+import { LocalizedTitle } from './core/i18n/localized-title';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideHttpClient(),
     provideRouter(routes),
+    translationProviders,
+    provideAppInitializer(() => inject(Language).initialize()),
+    { provide: TitleStrategy, useClass: LocalizedTitle },
+    {
+      provide: TUI_DARK_MODE,
+      useFactory: () => {
+        // Rollout has a fixed theme, so Taiga UI does not need to access storage.
+        const dark = signal(true);
+        return Object.assign(dark, { reset: () => dark.set(true) });
+      },
+    },
     provideTaiga({ mode: 'dark' }),
     {
-      provide: TUI_PAGINATION_TEXTS,
-      useValue: computed(() => ['Назад', 'Вперёд'] as const),
+      provide: TUI_LANGUAGE,
+      useFactory: () => {
+        const language = inject(Language).current;
+        return computed(() =>
+          language() === 'ru' ? TUI_RUSSIAN_LANGUAGE : TUI_ENGLISH_LANGUAGE,
+        );
+      },
     },
     tuiIconsProvider({
       '@tui.chevron-down':

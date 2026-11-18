@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() =>
+    localStorage.setItem('rollout.language', 'ru'),
+  );
+});
+
 test('creates a flag, changes one environment and shows the audit history', async ({
   page,
 }) => {
@@ -70,10 +76,10 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   const status = rows.filter({ hasText: 'Статус' });
   await expect(status.getByRole('rowheader')).toHaveText(/Статус\s+Staging/);
   await expect(
-    status.getByRole('cell', { name: 'true', exact: true }),
+    status.getByRole('cell', { name: 'Включён', exact: true }),
   ).toBeVisible();
   await expect(
-    status.getByRole('cell', { name: 'false', exact: true }),
+    status.getByRole('cell', { name: 'Выключен', exact: true }),
   ).toBeVisible();
   const change = rows.filter({ hasText: 'Rollout' });
   await expect(change.getByRole('rowheader')).toHaveText(/Rollout\s+Staging/);
@@ -111,7 +117,7 @@ test('searches by name and key, filters by environment and status, and paginates
 
   await page.goto('/flags');
   const search = page.getByRole('searchbox', { name: 'Поиск' });
-  const next = page.getByRole('button', { name: 'Вперёд' });
+  const next = page.getByRole('button', { name: 'Следующая страница' });
   const rows = page.getByRole('row');
   await search.fill(name);
   await expect(page.getByText('Всего флагов: 21')).toBeVisible();

@@ -7,6 +7,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { filter, firstValueFrom } from 'rxjs';
 import { appConfig } from '../../../app.config';
+import { LANGUAGE_STORAGE_KEY } from '../../../core/i18n/language';
 import {
   FlagListItem,
   FlagResponse,
@@ -53,6 +54,7 @@ describe('FlagsList', () => {
     vi.stubGlobal('matchMedia', (query: string) =>
       Object.assign(new EventTarget(), { matches: false, media: query }),
     );
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, 'ru');
     TestBed.configureTestingModule({
       providers: [...appConfig.providers, provideHttpClientTesting()],
     });
@@ -68,6 +70,7 @@ describe('FlagsList', () => {
   });
 
   afterEach(() => {
+    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
     vi.unstubAllGlobals();
     http.verify();
   });

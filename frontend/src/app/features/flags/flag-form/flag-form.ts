@@ -19,6 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 import {
   TuiButton,
   TuiError,
@@ -36,13 +37,21 @@ import {
   FlagResponse,
 } from '../../../core/models/flag.model';
 
-function saveErrors(error: unknown): string[] {
+const VALIDATION_ERRORS = new Map([
+  ['key', 'form.errors.key'],
+  ['name', 'form.errors.name'],
+  ['environment', 'form.errors.environment'],
+  ['enabled', 'form.errors.enabled'],
+  ['rolloutPercentage', 'form.errors.rolloutPercentage'],
+]);
+
+function saveErrors(error: unknown, editing: boolean): string[] {
   if (error instanceof HttpErrorResponse) {
     if (error.status === 409) {
-      return ['Флаг с таким ключом уже существует.'];
+      return ['form.errors.duplicate'];
     }
     if (error.status === 404) {
-      return ['Флаг не найден.'];
+      return ['form.errors.notFound'];
     }
     const problem: unknown = error.error;
     if (error.status === 400 && problem && typeof problem === 'object') {
@@ -51,33 +60,29 @@ function saveErrors(error: unknown): string[] {
         problem.errors &&
         typeof problem.errors === 'object'
       ) {
-        const groups: unknown[] = Object.values(problem.errors);
-        const messages = groups
-          .flat()
-          .filter(
-            (value): value is string =>
-              typeof value === 'string' && value.trim().length > 0,
-          );
-        if (messages.length) {
-          return [...new Set(messages)];
+        const fields = Object.keys(problem.errors);
+        if (fields.length) {
+          return [
+            ...new Set(
+              fields.map((field) =>
+                field === 'key' && editing
+                  ? 'form.errors.immutableKey'
+                  : (VALIDATION_ERRORS.get(field) ?? 'form.errors.checkFields'),
+              ),
+            ),
+          ];
         }
-      }
-      if (
-        'detail' in problem &&
-        typeof problem.detail === 'string' &&
-        problem.detail.trim()
-      ) {
-        return [problem.detail];
       }
     }
   }
-  return ['Не удалось сохранить флаг. Попробуйте ещё раз.'];
+  return ['form.errors.save'];
 }
 
 @Component({
   imports: [
     ReactiveFormsModule,
     RouterLink,
+    TranslatePipe,
     TuiButton,
     TuiLink,
     TuiSwitch,
@@ -159,7 +164,7 @@ export class FlagForm {
     if (this.form.invalid || settings.invalid || rolloutPercentage === null) {
       this.form.markAllAsTouched();
       settings.markAllAsTouched();
-      this.errors.set(['Проверьте отмеченные поля.']);
+      this.errors.set(['form.errors.checkFields']);
       return;
     }
 
@@ -182,7 +187,7 @@ export class FlagForm {
           if (id !== this.id()) {
             return;
           }
-          this.confirmation.set(id ? 'Флаг сохранён.' : 'Флаг создан.');
+          this.confirmation.set(id ? 'form.saved' : 'form.created');
           void this.router
             .navigate(['/flags'], {
               queryParams: { environment },
@@ -194,7 +199,7 @@ export class FlagForm {
         },
         error: (error: unknown) => {
           if (id === this.id()) {
-            this.errors.set(saveErrors(error));
+            this.errors.set(saveErrors(error, id !== null));
           }
         },
       });

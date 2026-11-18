@@ -1,19 +1,25 @@
 <section class="mt-7" aria-labelledby="flags-heading">
   <div class="flex flex-wrap items-center justify-between gap-3">
-    <h2 id="flags-heading" class="m-0 text-2xl font-semibold">Список флагов</h2>
-    <a tuiButton size="m" routerLink="/flags/new">Создать флаг</a>
+    <h2 id="flags-heading" class="m-0 text-2xl font-semibold">
+      {{ 'list.heading' | translate }}
+    </h2>
+    <a tuiButton size="m" routerLink="/flags/new">{{
+      'list.create' | translate
+    }}</a>
   </div>
 
   <div class="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_10rem_11rem]">
     <div class="grid gap-1.5">
       <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-        <label tuiLabel for="flag-search">Поиск</label>
+        <label tuiLabel for="flag-search">{{
+          'list.search' | translate
+        }}</label>
         <input
           #searchInput
           tuiInput
           id="flag-search"
           type="search"
-          placeholder="Название или ключ"
+          [placeholder]="'list.searchPlaceholder' | translate"
           (input)="search.set(searchInput.value)"
         />
       </tui-textfield>
@@ -24,7 +30,9 @@
         tuiTextfieldSize="m"
         [tuiTextfieldCleaner]="false"
       >
-        <label tuiLabel for="flag-environment">Окружение</label>
+        <label tuiLabel for="flag-environment">{{
+          'common.environment' | translate
+        }}</label>
         <select
           tuiSelect
           id="flag-environment"
@@ -39,8 +47,11 @@
         tuiChevron
         tuiTextfieldSize="m"
         [tuiTextfieldCleaner]="false"
+        [stringify]="statusLabel"
       >
-        <label tuiLabel for="flag-status">Статус</label>
+        <label tuiLabel for="flag-status">{{
+          'common.status' | translate
+        }}</label>
         <select
           tuiSelect
           id="flag-status"
@@ -56,7 +67,7 @@
     @if (notice(); as feedback) {
       @if (!feedback.error) {
         <div tuiNotification appearance="positive" icon="" class="mt-4">
-          {{ feedback.message }}
+          {{ 'list.statusUpdated' | translate: feedback }}
         </div>
       }
     }
@@ -65,7 +76,7 @@
     @if (notice(); as feedback) {
       @if (feedback.error) {
         <div tuiNotification appearance="negative" icon="" class="mt-4">
-          {{ feedback.message }}
+          {{ 'list.statusUpdateError' | translate: feedback }}
         </div>
       }
     }
@@ -73,13 +84,13 @@
 
   <div role="status">
     @if (flags.isLoading()) {
-      <tui-loader class="mt-4" textContent="Загружаем флаги…" />
+      <tui-loader class="mt-4" [textContent]="'list.loading' | translate" />
     } @else if (flags.hasValue() && flags.value().items.length === 0) {
       <div tuiNotification appearance="neutral" icon="" class="mt-5">
         @if (enabled() !== undefined || search().trim()) {
-          По заданным фильтрам флаги не найдены.
+          {{ 'list.noMatches' | translate }}
         } @else {
-          Флагов пока нет.
+          {{ 'list.empty' | translate }}
         }
       </div>
     }
@@ -87,7 +98,7 @@
 
   @if (flags.status() === 'error') {
     <div tuiNotification appearance="negative" icon="" class="mt-5">
-      <p class="m-0" role="alert">Не удалось загрузить список флагов.</p>
+      <p class="m-0" role="alert">{{ 'list.loadError' | translate }}</p>
       <button
         tuiButton
         appearance="outline"
@@ -95,7 +106,7 @@
         type="button"
         (click)="flags.reload()"
       >
-        Повторить
+        {{ 'common.retry' | translate }}
       </button>
     </div>
   }
@@ -104,18 +115,18 @@
     <div
       class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
       role="region"
-      aria-label="Таблица флагов"
+      [attr.aria-label]="'list.table' | translate"
       tabindex="0"
     >
       <table tuiTable class="w-full min-w-[53rem]">
         <thead>
           <tr>
-            <th tuiTh scope="col">Флаг</th>
-            <th tuiTh scope="col">Окружение</th>
-            <th tuiTh scope="col">Статус</th>
-            <th tuiTh scope="col">Rollout</th>
-            <th tuiTh scope="col">Последнее изменение</th>
-            <th tuiTh scope="col">Действия</th>
+            <th tuiTh scope="col">{{ 'list.flag' | translate }}</th>
+            <th tuiTh scope="col">{{ 'common.environment' | translate }}</th>
+            <th tuiTh scope="col">{{ 'common.status' | translate }}</th>
+            <th tuiTh scope="col">{{ 'common.rollout' | translate }}</th>
+            <th tuiTh scope="col">{{ 'list.updated' | translate }}</th>
+            <th tuiTh scope="col">{{ 'list.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody tuiTbody>
@@ -142,11 +153,16 @@
                     type="checkbox"
                     [showIcons]="false"
                     [ngModel]="flag.enabled"
-                    [attr.aria-label]="'Статус флага «' + flag.name + '»'"
+                    [attr.aria-label]="
+                      'list.flagStatus' | translate: { name: flag.name }
+                    "
                     [attr.aria-disabled]="pending || flags.isLoading()"
                     (click)="toggleFlag($event, flag)"
                   />
-                  <span>{{ flag.enabled ? 'Включён' : 'Выключен' }}</span>
+                  <span>{{
+                    (flag.enabled ? 'common.enabled' : 'common.disabled')
+                      | translate
+                  }}</span>
                 </div>
                 @if (pending) {
                   <span
@@ -154,14 +170,14 @@
                     role="status"
                   >
                     <tui-loader size="xs" aria-hidden="true" />
-                    Сохранение…
+                    {{ 'list.saving' | translate }}
                   </span>
                 }
               </td>
               <td tuiTd class="tabular-nums">{{ flag.rolloutPercentage }}%</td>
               <td tuiTd class="whitespace-nowrap tabular-nums">
                 <time [attr.datetime]="flag.updatedAtUtc">
-                  {{ flag.updatedAtUtc | date: 'dd.MM.yyyy, HH:mm' }}
+                  {{ formatUpdatedAt(flag.updatedAtUtc) }}
                 </time>
               </td>
               <td tuiTd>
@@ -169,14 +185,18 @@
                   <a
                     tuiLink
                     [routerLink]="['/flags', flag.id, 'edit']"
-                    [attr.aria-label]="'Изменить флаг «' + flag.name + '»'"
-                    >Изменить</a
+                    [attr.aria-label]="
+                      'list.editFlag' | translate: { name: flag.name }
+                    "
+                    >{{ 'list.edit' | translate }}</a
                   >
                   <a
                     tuiLink
                     [routerLink]="['/flags', flag.id, 'history']"
-                    [attr.aria-label]="'История флага «' + flag.name + '»'"
-                    >История</a
+                    [attr.aria-label]="
+                      'list.flagHistory' | translate: { name: flag.name }
+                    "
+                    >{{ 'list.history' | translate }}</a
                   >
                 </div>
               </td>
@@ -189,11 +209,11 @@
 
   <nav
     class="mt-4 flex flex-wrap items-center justify-between gap-3"
-    aria-label="Страницы флагов"
+    [attr.aria-label]="'list.pages' | translate"
   >
     <span class="flag-count">
       @if (flags.hasValue()) {
-        Всего флагов: {{ flags.value().totalCount }}
+        {{ 'list.total' | translate: { count: flags.value().totalCount } }}
       }
     </span>
     <fieldset
@@ -209,7 +229,7 @@
     </fieldset>
     <span class="sr-only" aria-live="polite">
       @if (flags.hasValue() && !flags.isLoading()) {
-        Страница {{ page() }} из {{ pageCount() }}
+        {{ 'common.page' | translate: { current: page(), total: pageCount() } }}
       }
     </span>
   </nav>

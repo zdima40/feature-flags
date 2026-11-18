@@ -5,6 +5,7 @@ import {
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { appConfig } from '../../../app.config';
+import { LANGUAGE_STORAGE_KEY } from '../../../core/i18n/language';
 import { FlagAuditEvent, PageResponse } from '../../../core/models/flag.model';
 import { FlagHistory } from './flag-history';
 
@@ -45,6 +46,7 @@ describe('FlagHistory', () => {
     vi.stubGlobal('matchMedia', (query: string) =>
       Object.assign(new EventTarget(), { matches: false, media: query }),
     );
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, 'ru');
     TestBed.configureTestingModule({
       providers: [...appConfig.providers, provideHttpClientTesting()],
     });
@@ -54,6 +56,7 @@ describe('FlagHistory', () => {
   });
 
   afterEach(() => {
+    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
     vi.unstubAllGlobals();
     http.verify();
   });
@@ -86,7 +89,7 @@ describe('FlagHistory', () => {
     const time = rows[0].querySelector('time');
     expect(time?.dateTime).toBe(updated.changedAtUtc);
     expect(time?.textContent?.trim()).toBe(
-      new Intl.DateTimeFormat(undefined, {
+      new Intl.DateTimeFormat('ru', {
         dateStyle: 'medium',
         timeStyle: 'medium',
       }).format(new Date(updated.changedAtUtc)),

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   Component,
   computed,
@@ -14,6 +13,7 @@ import {
 } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { TuiTable } from '@taiga-ui/addon-table';
 import {
   TuiButton,
@@ -31,6 +31,7 @@ import {
 } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
+import { Language } from '../../../core/i18n/language';
 import {
   FLAG_ENVIRONMENTS,
   FlagEnvironment,
@@ -40,9 +41,9 @@ import {
 
 const PAGE_SIZE = 20;
 const STATUS_FILTERS = {
-  'Все статусы': undefined,
-  Включённые: true,
-  Выключенные: false,
+  all: undefined,
+  enabled: true,
+  disabled: false,
 } as const;
 
 function lastPage(result: PageResponse<FlagListItem>): number {
@@ -51,9 +52,9 @@ function lastPage(result: PageResponse<FlagListItem>): number {
 
 @Component({
   imports: [
-    DatePipe,
     FormsModule,
     RouterLink,
+    TranslatePipe,
     TuiButton,
     TuiLink,
     TuiSwitch,
@@ -75,6 +76,15 @@ export class FlagsList {
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly translations = inject(TranslateService);
+  private readonly language = inject(Language);
+  private readonly dateTime = computed(
+    () =>
+      new Intl.DateTimeFormat(this.language.current(), {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }),
+  );
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     requireSync: true,
   });
@@ -82,7 +92,7 @@ export class FlagsList {
 
   protected readonly saving = signal<ReadonlySet<string>>(new Set());
   protected readonly notice = signal<
-    { message: string; error: boolean } | undefined
+    { name: string; environment: FlagEnvironment; error: boolean } | undefined
   >(undefined);
 
   protected readonly environments = FLAG_ENVIRONMENTS;
@@ -94,9 +104,12 @@ export class FlagsList {
     );
   });
   protected readonly search = signal('');
+  protected readonly status = signal<keyof typeof STATUS_FILTERS>('all');
   protected readonly statuses = Object.keys(STATUS_FILTERS);
-  protected readonly status =
-    signal<keyof typeof STATUS_FILTERS>('Все статусы');
+  protected readonly statusLabel = (status: keyof typeof STATUS_FILTERS) => {
+    const label = this.translations.instant(`list.status.${status}`);
+    return typeof label === 'string' ? label : status;
+  };
   protected readonly enabled = computed(() => STATUS_FILTERS[this.status()]);
 
   private readonly searchTerm = computed(() => this.search().trim());
@@ -133,6 +146,10 @@ export class FlagsList {
 
   protected flagKey(flag: FlagListItem): string {
     return `${flag.environment}/${flag.id}`;
+  }
+
+  protected formatUpdatedAt(timestamp: string): string {
+    return this.dateTime().format(new Date(timestamp));
   }
 
   protected changeEnvironment(environment: FlagEnvironment): void {
@@ -180,7 +197,8 @@ export class FlagsList {
       .subscribe({
         next: () => {
           this.notice.set({
-            message: `Статус флага «${flag.name}» в ${flag.environment} обновлён.`,
+            name: flag.name,
+            environment: flag.environment,
             error: false,
           });
           if (this.environment() === flag.environment && !this.flags.reload()) {
@@ -190,7 +208,8 @@ export class FlagsList {
         },
         error: () =>
           this.notice.set({
-            message: `Не удалось обновить статус флага «${flag.name}» в ${flag.environment}. Попробуйте ещё раз.`,
+            name: flag.name,
+            environment: flag.environment,
             error: true,
           }),
       });

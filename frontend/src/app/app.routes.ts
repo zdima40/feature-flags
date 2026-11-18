@@ -9,7 +9,7 @@ export const routes: Routes = [
   { path: '', redirectTo: 'flags', pathMatch: 'full' },
   {
     path: 'flags',
-    title: 'Список флагов | Rollout',
+    title: 'list.heading',
     loadComponent: () =>
       import('./features/flags/flags-list/flags-list').then(
         (module) => module.FlagsList,
@@ -17,17 +17,17 @@ export const routes: Routes = [
   },
   {
     path: 'flags/new',
-    title: 'Создать флаг',
+    title: 'list.create',
     loadComponent: loadFlagForm,
   },
   {
     path: 'flags/:id/edit',
-    title: 'Редактирование флага',
+    title: 'form.edit',
     loadComponent: loadFlagForm,
   },
   {
     path: 'flags/:id/history',
-    title: 'История флага',
+    title: 'history.heading',
     loadComponent: () =>
       import('./features/flags/flag-history/flag-history').then(
         (module) => module.FlagHistory,

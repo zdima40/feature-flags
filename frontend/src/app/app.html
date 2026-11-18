@@ -2,11 +2,39 @@
   <main
     class="mx-auto box-border min-h-dvh max-w-7xl px-4 py-6 sm:px-8 sm:py-10"
   >
-    <h1
-      class="border-divider text-accent m-0 border-b pb-4 text-2xl font-semibold sm:text-3xl"
+    <header
+      class="border-divider flex flex-wrap items-center justify-between gap-3 border-b pb-4"
     >
-      Rollout
-    </h1>
+      <h1 class="text-accent m-0 text-2xl font-semibold sm:text-3xl">
+        Rollout
+      </h1>
+      <tui-segmented
+        role="radiogroup"
+        [attr.aria-label]="'app.language' | translate"
+        [activeItemIndex]="language.current() === 'en' ? 0 : 1"
+      >
+        <label lang="en">
+          <input
+            type="radio"
+            name="language"
+            value="en"
+            [checked]="language.current() === 'en'"
+            (change)="language.select('en')"
+          />
+          English
+        </label>
+        <label lang="ru">
+          <input
+            type="radio"
+            name="language"
+            value="ru"
+            [checked]="language.current() === 'ru'"
+            (change)="language.select('ru')"
+          />
+          Русский
+        </label>
+      </tui-segmented>
+    </header>
     <router-outlet />
   </main>
 </tui-root>

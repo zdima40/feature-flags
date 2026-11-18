@@ -2,9 +2,11 @@
 
 Rollout — панель управления feature flags. API хранит настройки отдельно для Development, Staging и Production. Процент rollout сохраняется как настройка для будущего распределения пользователей.
 
+Интерфейс открывается на английском. Переключатель **English / Русский** в шапке применяет язык сразу и сохраняет выбор в браузере.
+
 ## Стек
 
-- **Frontend** — Angular 22, TypeScript 6 и RxJS. Компоненты интерфейса построены на Taiga UI 5, стили — на Tailwind CSS 4.
+- **Frontend** — Angular 22, TypeScript 6 и RxJS. Компоненты интерфейса построены на Taiga UI 5, стили — на Tailwind CSS 4, переводы подключены через ngx-translate.
 - **Backend** — C# и ASP.NET Core 10 Web API. Контракт описан в OpenAPI, интерактивная документация доступна через Swagger UI.
 - **Хранение данных** — SQLite и Entity Framework Core 10. Изменения схемы оформляются миграциями EF Core.
 - **Тестирование и CI** — Vitest для frontend, xUnit для backend, Playwright для сквозных тестов и axe-core для проверок доступности. Сборка и тесты запускаются в GitHub Actions.

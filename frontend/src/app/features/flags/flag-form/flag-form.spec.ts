@@ -7,6 +7,7 @@ import { NavigationEnd, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { filter, firstValueFrom } from 'rxjs';
 import { appConfig } from '../../../app.config';
+import { LANGUAGE_STORAGE_KEY } from '../../../core/i18n/language';
 import { FlagResponse } from '../../../core/models/flag.model';
 import { FlagForm } from './flag-form';
 
@@ -51,6 +52,7 @@ describe('FlagForm', () => {
     vi.stubGlobal('matchMedia', (query: string) =>
       Object.assign(new EventTarget(), { matches: false, media: query }),
     );
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, 'ru');
     TestBed.configureTestingModule({
       providers: [...appConfig.providers, provideHttpClientTesting()],
     });
@@ -60,6 +62,7 @@ describe('FlagForm', () => {
   });
 
   afterEach(() => {
+    localStorage.removeItem(LANGUAGE_STORAGE_KEY);
     vi.unstubAllGlobals();
     http.verify();
   });
@@ -289,10 +292,12 @@ describe('FlagForm', () => {
       body: {
         errors: {
           name: ['Name is required.'],
-          rolloutPercentage: ['Check rollout.'],
+          rolloutPercentage: [
+            'Rollout percentage must be an integer between 0 and 100.',
+          ],
         },
       },
-      message: 'Name is required.',
+      message: 'Введите название флага.',
     },
   ])(
     'shows POST Problem Details for $status and keeps the form editable',

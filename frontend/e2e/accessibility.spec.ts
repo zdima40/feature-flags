@@ -38,6 +38,9 @@ for (const width of [1440, 390]) {
       page,
       request,
     }) => {
+      await page.addInitScript(() =>
+        localStorage.setItem('rollout.language', 'ru'),
+      );
       const key = `accessibility-${randomUUID()}`;
       const created = await request.post('/api/flags', {
         data: {
@@ -57,10 +60,12 @@ for (const width of [1440, 390]) {
       const name = page.getByRole('textbox', { name: 'Название' });
       const keyField = page.getByRole('textbox', { name: 'Ключ' });
       const rollout = page.getByRole('textbox', { name: 'Rollout (%)' });
+      const language = page.getByRole('radio', { name: 'Русский' });
       await checkTextfield(name);
       await checkTextfield(keyField);
       await checkTextfield(rollout);
       await checkPage(page);
+      await tabTo(page, language);
       await tabTo(page, name);
       await tabTo(page, keyField);
       await tabTo(page, page.getByRole('textbox', { name: 'Описание' }));
@@ -116,6 +121,7 @@ for (const width of [1440, 390]) {
       await checkTextfield(environment);
       await checkTextfield(status);
       await checkPage(page);
+      await tabTo(page, language);
       await tabTo(page, page.getByRole('link', { name: 'Создать флаг' }));
       await tabTo(page, search);
       await page.keyboard.insertText(key);
@@ -147,6 +153,7 @@ for (const width of [1440, 390]) {
         page.getByRole('rowheader', { name: 'Флаг создан' }),
       ).toBeVisible();
       const back = page.getByRole('link', { name: 'К списку флагов' });
+      await tabTo(page, language);
       await tabTo(page, back);
       await tabTo(page, page.getByRole('region', { name: 'Таблица событий' }));
       await page.keyboard.press('Shift+Tab');

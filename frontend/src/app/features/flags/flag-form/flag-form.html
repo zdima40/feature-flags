@@ -1,12 +1,12 @@
 <section class="mt-7 max-w-2xl" aria-labelledby="flag-form-heading">
   <h2 id="flag-form-heading" class="m-0 text-2xl font-semibold">
-    {{ id() ? 'Редактирование флага' : 'Создание флага' }}
+    {{ (id() ? 'form.edit' : 'form.create') | translate }}
   </h2>
 
   <div role="status">
     @if (confirmation(); as message) {
       <div tuiNotification appearance="positive" icon="" class="my-4">
-        {{ message }}
+        {{ message | translate }}
       </div>
     }
   </div>
@@ -16,11 +16,11 @@
       tuiLink
       routerLink="/flags"
       [queryParams]="{ environment: activeEnvironment() }"
-      >К списку флагов</a
+      >{{ 'common.back' | translate }}</a
     >
   } @else if (flag.isLoading()) {
     <div role="status" class="mt-4">
-      <tui-loader textContent="Загружаем флаг…" />
+      <tui-loader [textContent]="'form.loading' | translate" />
     </div>
   } @else if (flag.status() === 'error') {
     <div
@@ -30,7 +30,7 @@
       role="alert"
       class="my-4"
     >
-      Не удалось загрузить флаг.
+      {{ 'form.loadError' | translate }}
     </div>
     <div class="flex flex-wrap items-center gap-3">
       <button
@@ -40,9 +40,9 @@
         size="m"
         (click)="flag.reload()"
       >
-        Повторить
+        {{ 'common.retry' | translate }}
       </button>
-      <a tuiLink routerLink="/flags">К списку флагов</a>
+      <a tuiLink routerLink="/flags">{{ 'common.back' | translate }}</a>
     </div>
   } @else {
     @let fields = form.controls;
@@ -60,7 +60,9 @@
       >
         <div class="grid gap-1.5">
           <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-            <label tuiLabel for="flag-name">Название</label>
+            <label tuiLabel for="flag-name">{{
+              'common.name' | translate
+            }}</label>
             <input
               tuiInput
               id="flag-name"
@@ -71,12 +73,15 @@
             />
           </tui-textfield>
           @if (nameInvalid) {
-            <tui-error id="flag-name-error" error="Введите название флага." />
+            <tui-error
+              id="flag-name-error"
+              [error]="'form.errors.name' | translate"
+            />
           }
         </div>
         <div class="grid gap-1.5">
           <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-            <label tuiLabel for="flag-key">Ключ</label>
+            <label tuiLabel for="flag-key">{{ 'form.key' | translate }}</label>
             <input
               tuiInput
               id="flag-key"
@@ -90,21 +95,23 @@
           </tui-textfield>
           <span id="flag-key-hint" class="field-hint text-sm">
             @if (id()) {
-              Ключ зафиксирован при создании флага.
+              {{ 'form.immutableKey' | translate }}
             } @else {
-              Латинские буквы, цифры, дефис и подчёркивание.
+              {{ 'form.keyHint' | translate }}
             }
           </span>
           @if (keyInvalid) {
             <tui-error
               id="flag-key-error"
-              error="Введите ключ в указанном формате."
+              [error]="'form.errors.key' | translate"
             />
           }
         </div>
         <div class="grid gap-1.5">
           <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
-            <label tuiLabel for="flag-description">Описание</label>
+            <label tuiLabel for="flag-description">{{
+              'common.description' | translate
+            }}</label>
             <textarea
               tuiTextarea
               id="flag-description"
@@ -117,10 +124,12 @@
         <fieldset
           class="border-divider m-0 grid min-w-0 gap-4 rounded-xl border p-4"
         >
-          <legend class="px-1 font-semibold">Настройки окружения</legend>
+          <legend class="px-1 font-semibold">
+            {{ 'form.environmentSettings' | translate }}
+          </legend>
           <tui-tabs
             role="tablist"
-            aria-label="Окружение"
+            [attr.aria-label]="'common.environment' | translate"
             size="m"
             [(activeItemIndex)]="activeEnvironmentIndex"
           >
@@ -158,14 +167,16 @@
                       [formControl]="environmentFields.enabled"
                       [showIcons]="false"
                     />
-                    Флаг включён
+                    {{ 'form.enabled' | translate }}
                   </label>
                   <div class="grid gap-1.5">
                     <tui-textfield
                       tuiTextfieldSize="m"
                       [tuiTextfieldCleaner]="false"
                     >
-                      <label tuiLabel for="flag-rollout">Rollout (%)</label>
+                      <label tuiLabel for="flag-rollout">{{
+                        'form.rollout' | translate
+                      }}</label>
                       <input
                         tuiInputNumber
                         id="flag-rollout"
@@ -184,7 +195,7 @@
                     @if (rolloutInvalid) {
                       <tui-error
                         id="flag-rollout-error"
-                        error="Введите целое число от 0 до 100."
+                        [error]="'form.errors.rolloutPercentage' | translate"
                       />
                     }
                   </div>
@@ -194,7 +205,9 @@
           }
         </fieldset>
         <div class="flex flex-wrap gap-3">
-          <button tuiButton size="m" type="submit">Сохранить</button>
+          <button tuiButton size="m" type="submit">
+            {{ 'form.save' | translate }}
+          </button>
           <button
             tuiButton
             appearance="outline"
@@ -202,7 +215,7 @@
             type="button"
             (click)="cancel()"
           >
-            Отмена
+            {{ 'form.cancel' | translate }}
           </button>
         </div>
       </fieldset>
@@ -210,13 +223,13 @@
     <div role="alert">
       @for (message of errors(); track message) {
         <div tuiNotification appearance="negative" icon="" class="mt-4">
-          {{ message }}
+          {{ message | translate }}
         </div>
       }
     </div>
     <div role="status">
       @if (saving()) {
-        <tui-loader class="mt-4" textContent="Сохраняем флаг…" />
+        <tui-loader class="mt-4" [textContent]="'form.saving' | translate" />
       }
     </div>
   }
