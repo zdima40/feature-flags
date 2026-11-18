@@ -56,8 +56,10 @@ for (const width of [1440, 390]) {
       await page.goto('/flags/new');
       const name = page.getByRole('textbox', { name: 'Название' });
       const keyField = page.getByRole('textbox', { name: 'Ключ' });
+      const rollout = page.getByRole('textbox', { name: 'Rollout (%)' });
       await checkTextfield(name);
       await checkTextfield(keyField);
+      await checkTextfield(rollout);
       await checkPage(page);
       await tabTo(page, name);
       await tabTo(page, keyField);
@@ -82,7 +84,11 @@ for (const width of [1440, 390]) {
       await tabTo(page, formSwitch);
       await page.keyboard.press('Space');
       await expect(formSwitch).toBeChecked();
-      await tabTo(page, page.getByRole('spinbutton', { name: 'Rollout (%)' }));
+      await tabTo(page, rollout);
+      await page.keyboard.press('ArrowUp');
+      await expect(rollout).toHaveValue('1%');
+      await page.keyboard.press('ArrowDown');
+      await expect(rollout).toHaveValue('0%');
       const save = page.getByRole('button', { name: 'Сохранить' });
       await tabTo(page, save);
       await tabTo(page, page.getByRole('button', { name: 'Отмена' }));

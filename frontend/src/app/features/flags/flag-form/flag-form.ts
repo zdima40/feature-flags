@@ -19,8 +19,8 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TuiButton, TuiInput, TuiLink } from '@taiga-ui/core';
-import { TuiSwitch, TuiTabs, TuiTextarea } from '@taiga-ui/kit';
+import { TuiButton, tuiIconsProvider, TuiInput, TuiLink } from '@taiga-ui/core';
+import { TuiInputNumber, TuiSwitch, TuiTabs, TuiTextarea } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
 import {
@@ -76,6 +76,15 @@ function saveErrors(error: unknown): string[] {
     TuiTabs,
     TuiTextarea,
     TuiInput,
+    TuiInputNumber,
+  ],
+  providers: [
+    tuiIconsProvider({
+      '@tui.plus':
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>',
+      '@tui.minus':
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5 12h14" stroke="black" stroke-width="2" stroke-linecap="round"/></svg>',
+    }),
   ],
   selector: 'app-flag-form',
   styleUrl: './flag-form.css',

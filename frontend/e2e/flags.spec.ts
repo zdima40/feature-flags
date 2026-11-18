@@ -12,10 +12,20 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await page.getByLabel('Ключ', { exact: true }).fill(key);
   const environmentTab = (name: string) => page.getByRole('tab', { name });
   const enabled = page.getByLabel('Флаг включён');
-  const rollout = page.getByRole('spinbutton', { name: 'Rollout (%)' });
+  const rollout = page.getByRole('textbox', { name: 'Rollout (%)' });
   const save = page.getByRole('button', { name: 'Сохранить' });
   await environmentTab('Staging').click();
   await enabled.check();
+  const increase = page.getByRole('button', { name: '+', exact: true });
+  const decrease = page.getByRole('button', { name: '-', exact: true });
+  await expect(decrease).toBeDisabled();
+  await increase.click();
+  await expect(rollout).toHaveValue('1%');
+  await decrease.click();
+  await expect(rollout).toHaveValue('0%');
+  await rollout.fill('101');
+  await expect(rollout).toHaveValue('100%');
+  await expect(increase).toBeDisabled();
   await rollout.fill('25');
   await save.click();
   const listHeading = page.getByRole('heading', { name: 'Список флагов' });
@@ -34,7 +44,7 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await expect(page.getByLabel('Ключ', { exact: true })).toBeDisabled();
   await environmentTab('Staging').click();
   await expect(enabled).toBeChecked();
-  await expect(rollout).toHaveValue('25');
+  await expect(rollout).toHaveValue('25%');
 
   await enabled.uncheck();
   await rollout.fill('60');
@@ -46,11 +56,11 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   for (const other of ['Development', 'Production']) {
     await environmentTab(other).click();
     await expect(enabled).not.toBeChecked();
-    await expect(rollout).toHaveValue('0');
+    await expect(rollout).toHaveValue('0%');
   }
   await environmentTab('Staging').click();
   await expect(enabled).not.toBeChecked();
-  await expect(rollout).toHaveValue('60');
+  await expect(rollout).toHaveValue('60%');
 
   await page.getByRole('button', { name: 'Отмена' }).click();
   await search.fill(key);

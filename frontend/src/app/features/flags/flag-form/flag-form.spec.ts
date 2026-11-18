@@ -82,6 +82,7 @@ describe('FlagForm', () => {
     );
     control.value = value;
     control.dispatchEvent(new Event('input', { bubbles: true }));
+    TestBed.tick();
   }
 
   async function selectEnvironment(value: string): Promise<void> {
@@ -133,7 +134,7 @@ describe('FlagForm', () => {
     expect(input('key').disabled).toBe(false);
     expect(input('name').getAttribute('aria-invalid')).toBe('false');
     expect(input('key').getAttribute('aria-invalid')).toBe('false');
-    expect(input('rollout').value).toBe('0');
+    expect(input('rollout').value).toBe('0%');
     expect(input('enabled').checked).toBe(false);
 
     submit();
@@ -148,8 +149,6 @@ describe('FlagForm', () => {
     { field: 'name', value: '   ' },
     { field: 'key', value: 'Новый флаг!' },
     { field: 'rollout', value: '' },
-    { field: 'rollout', value: '-1' },
-    { field: 'rollout', value: '101' },
     { field: 'rollout', value: '12.5' },
   ])(
     'rejects $field with value "$value" before POST',
@@ -179,10 +178,10 @@ describe('FlagForm', () => {
     fill('rollout', '25');
     await selectEnvironment('Production');
     expect(input('enabled').checked).toBe(false);
-    expect(input('rollout').value).toBe('0');
+    expect(input('rollout').value).toBe('0%');
     await selectEnvironment('Staging');
     expect(input('enabled').checked).toBe(true);
-    expect(input('rollout').value).toBe('25');
+    expect(input('rollout').value).toBe('25%');
     submit();
     await harness.fixture.whenStable();
 
@@ -221,16 +220,16 @@ describe('FlagForm', () => {
 
     await selectEnvironment('Staging');
     expect(input('enabled').checked).toBe(true);
-    expect(input('rollout').value).toBe('25');
+    expect(input('rollout').value).toBe('25%');
     fill('rollout', '40');
     await selectEnvironment('Production');
     expect(input('enabled').checked).toBe(false);
-    expect(input('rollout').value).toBe('0');
+    expect(input('rollout').value).toBe('0%');
     await selectEnvironment('Staging');
-    expect(input('rollout').value).toBe('40');
+    expect(input('rollout').value).toBe('40%');
     await selectEnvironment('Production');
     expect(input('enabled').checked).toBe(false);
-    expect(input('rollout').value).toBe('0');
+    expect(input('rollout').value).toBe('0%');
     fill('description', '');
     input('enabled').click();
     fill('rollout', '100');
@@ -336,7 +335,7 @@ describe('FlagForm', () => {
     expect(element('[role="alert"]').textContent).toContain(
       'Не удалось сохранить флаг',
     );
-    expect(input('rollout').value).toBe('55');
+    expect(input('rollout').value).toBe('55%');
     expect(element<HTMLFieldSetElement>('form > fieldset').disabled).toBe(
       false,
     );

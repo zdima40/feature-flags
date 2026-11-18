@@ -151,19 +151,25 @@
                   </div>
                   <div class="grid gap-1.5">
                     <label for="flag-rollout">Rollout (%)</label>
-                    <input
-                      id="flag-rollout"
-                      type="number"
-                      min="0"
-                      max="100"
-                      step="1"
-                      required
-                      [formControl]="environmentFields.rolloutPercentage"
-                      [attr.aria-invalid]="rolloutInvalid"
-                      [attr.aria-describedby]="
-                        rolloutInvalid ? 'flag-rollout-error' : null
-                      "
-                    />
+                    <tui-textfield
+                      tuiTextfieldSize="m"
+                      [tuiTextfieldCleaner]="false"
+                    >
+                      <input
+                        tuiInputNumber
+                        id="flag-rollout"
+                        postfix="%"
+                        required
+                        [min]="0"
+                        [max]="100"
+                        [step]="1"
+                        [formControl]="environmentFields.rolloutPercentage"
+                        [attr.aria-invalid]="rolloutInvalid"
+                        [attr.aria-describedby]="
+                          rolloutInvalid ? 'flag-rollout-error' : null
+                        "
+                      />
+                    </tui-textfield>
                     @if (rolloutInvalid) {
                       <span id="flag-rollout-error" class="field-error text-sm"
                         >Введите целое число от 0 до 100.</span
