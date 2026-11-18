@@ -109,6 +109,18 @@ describe('FlagForm', () => {
     );
   }
 
+  async function expectFlagList(): Promise<void> {
+    expect(router.url).toBe('/flags');
+    TestBed.tick();
+    http
+      .expectOne(
+        (request) => request.method === 'GET' && request.url === '/api/flags',
+      )
+      .flush({ items: [], totalCount: 0, page: 1, pageSize: 20 });
+    await harness.fixture.whenStable();
+    expect(element('h2').textContent).toContain('Список флагов');
+  }
+
   it('marks missing name and key after submission and sends no request', async () => {
     await harness.navigateByUrl('/flags/new', FlagForm);
     expect(input('key').disabled).toBe(false);
@@ -150,7 +162,7 @@ describe('FlagForm', () => {
     },
   );
 
-  it('sends initial settings for the selected environment and opens edit after creation', async () => {
+  it('sends initial settings for the selected environment and returns to the list after creation', async () => {
     await harness.navigateByUrl('/flags/new', FlagForm);
     fill('name', flag.name);
     fill('key', flag.key);
@@ -179,21 +191,10 @@ describe('FlagForm', () => {
     const navigation = nextNavigation();
     post.flush(flag, { status: 201, statusText: 'Created' });
     await navigation;
-    expect(router.url).toBe(editUrl);
-    flagRequest().flush(flag);
-    await harness.fixture.whenStable();
-
-    expect(harness.routeNativeElement?.textContent).toContain('Флаг создан.');
-    expect(input('key').value).toBe(flag.key);
-    expect(input('key').disabled).toBe(true);
-    expect(element<HTMLSelectElement>('#flag-environment').value).toBe(
-      'Staging',
-    );
-    expect(input('rollout').value).toBe('25');
-    expect(input('enabled').checked).toBe(true);
+    await expectFlagList();
   });
 
-  it('loads edit settings and preserves other environments while PATCH omits the key', async () => {
+  it('updates the selected environment without sending the key and returns to the list', async () => {
     await harness.navigateByUrl(editUrl, FlagForm);
     const get = flagRequest();
     expect(harness.routeNativeElement?.textContent).toContain('Загружаем флаг');
@@ -212,6 +213,11 @@ describe('FlagForm', () => {
     await selectEnvironment('Production');
     expect(input('enabled').checked).toBe(false);
     expect(input('rollout').value).toBe('0');
+    await selectEnvironment('Staging');
+    expect(input('rollout').value).toBe('40');
+    await selectEnvironment('Production');
+    expect(input('enabled').checked).toBe(false);
+    expect(input('rollout').value).toBe('0');
     fill('description', '');
     input('enabled').click();
     fill('rollout', '100');
@@ -225,6 +231,7 @@ describe('FlagForm', () => {
       enabled: true,
       rolloutPercentage: 100,
     });
+    const navigation = nextNavigation();
     patch.flush({
       ...flag,
       description: null,
@@ -234,18 +241,8 @@ describe('FlagForm', () => {
           : settings,
       ),
     });
-    await harness.fixture.whenStable();
-    expect(harness.routeNativeElement?.textContent).toContain('Флаг сохранён');
-
-    await selectEnvironment('Development');
-    expect(input('enabled').checked).toBe(false);
-    expect(input('rollout').value).toBe('0');
-    await selectEnvironment('Staging');
-    expect(input('enabled').checked).toBe(true);
-    expect(input('rollout').value).toBe('40');
-    await selectEnvironment('Production');
-    expect(input('enabled').checked).toBe(true);
-    expect(input('rollout').value).toBe('100');
+    await navigation;
+    await expectFlagList();
   });
 
   it('handles a load failure and retries with GET', async () => {
@@ -335,14 +332,7 @@ describe('FlagForm', () => {
     const navigation = nextNavigation();
     element<HTMLButtonElement>('form button[type="button"]').click();
     await navigation;
-    TestBed.tick();
-    http
-      .expectOne(
-        (request) => request.method === 'GET' && request.url === '/api/flags',
-      )
-      .flush({ items: [], totalCount: 0, page: 1, pageSize: 20 });
-    await harness.fixture.whenStable();
-    expect(router.url).toBe('/flags');
+    await expectFlagList();
     http.expectNone({ method: 'PATCH', url: flagUrl });
   });
 });

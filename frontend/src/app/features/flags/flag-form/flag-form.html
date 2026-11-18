@@ -9,14 +9,8 @@
     }
   </div>
 
-  @if (createdFlagId(); as savedId) {
-    <a
-      tuiLink
-      [routerLink]="['/flags', savedId, 'edit']"
-      [info]="form.controls.environment.value"
-    >
-      Перейти к редактированию
-    </a>
+  @if (confirmation()) {
+    <a tuiLink routerLink="/flags">К списку флагов</a>
   } @else if (flag.isLoading()) {
     <p role="status">Загружаем флаг…</p>
   } @else if (flag.status() === 'error') {

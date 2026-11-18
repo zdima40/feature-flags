@@ -91,20 +91,15 @@ export class FlagForm {
   });
 
   protected readonly id = computed(() => this.routeParams().get('id'));
-  private readonly createdIn = FLAG_ENVIRONMENTS.find(
-    (environment) =>
-      environment === this.router.currentNavigation()?.extras.info,
-  );
-  private readonly createdId = this.createdIn ? this.id() : null;
-  protected readonly confirmation = linkedSignal<string>(() =>
-    this.createdId && this.createdId === this.id() ? 'Флаг создан.' : '',
-  );
+  protected readonly confirmation = linkedSignal({
+    source: this.id,
+    computation: () => '',
+  });
   protected readonly errors = linkedSignal({
     source: this.id,
     computation: (): string[] => [],
   });
   protected readonly saving = signal(false);
-  protected readonly createdFlagId = signal<string | null>(null);
   protected readonly environments = FLAG_ENVIRONMENTS;
   protected readonly form = this.fb.group({
     name: ['', [Validators.required, Validators.pattern(/\S/)]],
@@ -129,7 +124,7 @@ export class FlagForm {
   });
 
   protected save(): void {
-    if (this.saving() || this.createdFlagId()) {
+    if (this.saving() || this.confirmation()) {
       return;
     }
 
@@ -137,7 +132,6 @@ export class FlagForm {
     const { key, name, description, environment } = this.form.getRawValue();
     const settings = this.settings[environment];
     const { enabled, rolloutPercentage } = settings.getRawValue();
-    this.confirmation.set('');
     if (this.form.invalid || settings.invalid || rolloutPercentage === null) {
       this.form.markAllAsTouched();
       settings.markAllAsTouched();
@@ -160,33 +154,16 @@ export class FlagForm {
         finalize(() => this.saving.set(false)),
       )
       .subscribe({
-        next: (saved) => {
+        next: () => {
           if (id !== this.id()) {
             return;
           }
-          if (!id) {
-            this.createdFlagId.set(saved.id);
-            this.confirmation.set('Флаг создан.');
-            void this.router
-              .navigate(['/flags', saved.id, 'edit'], {
-                replaceUrl: true,
-                info: environment,
-              })
-              .catch(() => {
-                // The created flag remains accessible from the confirmation.
-              });
-            return;
-          }
-          this.resetFields(saved, environment);
-          for (const savedSettings of saved.environments) {
-            const group = this.settings[savedSettings.environment];
-            if (savedSettings.environment === environment || group.pristine) {
-              group.reset(savedSettings);
-            }
-          }
-          this.confirmation.set(
-            `Флаг сохранён. Настройки ${environment} обновлены.`,
-          );
+          this.confirmation.set(id ? 'Флаг сохранён.' : 'Флаг создан.');
+          void this.router
+            .navigateByUrl('/flags', { replaceUrl: true })
+            .catch(() => {
+              // The confirmation offers a link if automatic navigation fails.
+            });
         },
         error: (error: unknown) => {
           if (id === this.id()) {
@@ -214,24 +191,14 @@ export class FlagForm {
   }
 
   private loadForm(flag: FlagResponse): void {
-    this.resetFields(
-      flag,
-      flag.id === this.createdId ? this.createdIn : undefined,
-    );
-    for (const settings of flag.environments) {
-      this.settings[settings.environment].reset(settings);
-    }
-  }
-
-  private resetFields(
-    flag: FlagResponse,
-    environment: FlagEnvironment = 'Development',
-  ): void {
     this.form.reset({
       name: flag.name,
       key: { value: flag.key, disabled: true },
       description: flag.description ?? '',
-      environment,
+      environment: 'Development',
     });
+    for (const settings of flag.environments) {
+      this.settings[settings.environment].reset(settings);
+    }
   }
 }

@@ -18,21 +18,25 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await enabled.check();
   await rollout.fill('25');
   await save.click();
-  await expect(
-    page.getByRole('heading', { name: 'Редактирование флага' }),
-  ).toBeVisible();
+  const listHeading = page.getByRole('heading', { name: 'Список флагов' });
+  const search = page.getByRole('searchbox', { name: 'Поиск' });
+  const edit = page.getByRole('link', { name: `Изменить флаг «${name}»` });
+  await expect(page).toHaveURL('/flags');
+  await expect(listHeading).toBeVisible();
+  await search.fill(key);
+  await edit.click();
   await expect(page.getByLabel('Ключ', { exact: true })).toBeDisabled();
-  await expect(environment).toHaveValue('Staging');
+  await environment.selectOption('Staging');
   await expect(enabled).toBeChecked();
   await expect(rollout).toHaveValue('25');
 
   await enabled.uncheck();
   await rollout.fill('60');
   await save.click();
-  await expect(
-    page.getByText('Флаг сохранён. Настройки Staging обновлены.'),
-  ).toBeVisible();
-  await page.reload();
+  await expect(page).toHaveURL('/flags');
+  await expect(listHeading).toBeVisible();
+  await search.fill(key);
+  await edit.click();
   for (const other of ['Development', 'Production']) {
     await environment.selectOption(other);
     await expect(enabled).not.toBeChecked();
@@ -43,7 +47,7 @@ test('creates a flag, changes one environment and shows the audit history', asyn
   await expect(rollout).toHaveValue('60');
 
   await page.getByRole('button', { name: 'Отмена' }).click();
-  await page.getByRole('searchbox', { name: 'Поиск' }).fill(key);
+  await search.fill(key);
   await page.getByRole('link', { name: `История флага «${name}»` }).click();
   const rows = page.getByRole('row');
   await expect(rows).toHaveCount(4);
