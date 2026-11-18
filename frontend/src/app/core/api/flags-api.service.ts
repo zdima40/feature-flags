@@ -24,6 +24,10 @@ export class FlagsApiService {
     });
   }
 
+  get(id: string) {
+    return this.http.get<FlagResponse>(`/api/flags/${encodeURIComponent(id)}`);
+  }
+
   setEnabled(id: string, environment: FlagEnvironment, enabled: boolean) {
     return this.http.patch<FlagResponse>(
       `/api/flags/${encodeURIComponent(id)}`,

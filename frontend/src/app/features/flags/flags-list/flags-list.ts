@@ -15,6 +15,7 @@ import { TuiSwitch } from '@taiga-ui/kit';
 import { finalize, tap } from 'rxjs';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
 import {
+  FLAG_ENVIRONMENTS,
   FlagEnvironment,
   FlagListItem,
   PageResponse,
@@ -50,11 +51,7 @@ export class FlagsList {
     { message: string; error: boolean } | undefined
   >(undefined);
 
-  protected readonly environments = [
-    'Development',
-    'Staging',
-    'Production',
-  ] as const;
+  protected readonly environments = FLAG_ENVIRONMENTS;
   protected readonly environment = signal<FlagEnvironment>('Development');
   protected readonly search = signal('');
   protected readonly enabled = signal<boolean | undefined>(undefined);

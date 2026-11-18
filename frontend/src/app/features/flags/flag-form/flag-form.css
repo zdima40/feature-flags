@@ -1,0 +1,26 @@
+select,
+input[type='number'] {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 2.75rem;
+  padding-inline: 0.75rem;
+  border: 1px solid var(--tui-border-normal);
+  border-radius: var(--tui-radius-m);
+  background: var(--tui-background-base-alt);
+  color: var(--tui-text-primary);
+  font: inherit;
+}
+
+select:focus-visible,
+input[type='number']:focus-visible {
+  outline: 2px solid var(--tui-border-focus);
+  outline-offset: 3px;
+}
+
+.field-hint {
+  color: var(--tui-text-secondary);
+}
+
+.field-error {
+  color: var(--tui-text-negative);
+}

@@ -1,0 +1,100 @@
+<section class="mt-7 max-w-2xl" aria-labelledby="flag-form-heading">
+  <h2 id="flag-form-heading" class="m-0 text-2xl font-semibold">
+    {{ id() ? 'Редактирование флага' : 'Создание флага' }}
+  </h2>
+
+  @if (flag.isLoading()) {
+    <p role="status">Загружаем флаг…</p>
+  } @else if (flag.status() === 'error') {
+    <p class="field-error" role="alert">Не удалось загрузить флаг.</p>
+    <div class="flex flex-wrap items-center gap-3">
+      <button
+        tuiButton
+        appearance="outline"
+        type="button"
+        size="m"
+        (click)="flag.reload()"
+      >
+        Повторить
+      </button>
+      <a tuiLink routerLink="/flags">К списку флагов</a>
+    </div>
+  } @else {
+    @let fields = form.controls;
+    @let environmentFields = settings[fields.environment.value].controls;
+    <form class="mt-5 grid gap-5" [formGroup]="form">
+      <div class="grid gap-1.5">
+        <label for="flag-name">Название</label>
+        <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+          <input tuiTextfield id="flag-name" formControlName="name" required />
+        </tui-textfield>
+      </div>
+      <div class="grid gap-1.5">
+        <label for="flag-key">Ключ</label>
+        <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+          <input
+            tuiTextfield
+            id="flag-key"
+            formControlName="key"
+            [required]="!id()"
+            aria-describedby="flag-key-hint"
+          />
+        </tui-textfield>
+        <span id="flag-key-hint" class="field-hint text-sm">
+          @if (id()) {
+            Ключ зафиксирован при создании флага.
+          } @else {
+            Латинские буквы, цифры, дефис и подчёркивание.
+          }
+        </span>
+      </div>
+      <div class="grid gap-1.5">
+        <label for="flag-description">Описание</label>
+        <tui-textfield tuiTextfieldSize="m" [tuiTextfieldCleaner]="false">
+          <textarea
+            tuiTextarea
+            id="flag-description"
+            formControlName="description"
+            [minRows]="3"
+            [maxRows]="8"
+          ></textarea>
+        </tui-textfield>
+      </div>
+      <fieldset
+        class="border-divider m-0 grid min-w-0 gap-4 rounded-xl border p-4"
+      >
+        <legend class="px-1 font-semibold">Настройки окружения</legend>
+        <div class="grid gap-1.5">
+          <label for="flag-environment">Окружение</label>
+          <select id="flag-environment" formControlName="environment">
+            @for (environment of environments; track environment) {
+              <option [value]="environment">{{ environment }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input
+            tuiSwitch
+            id="flag-enabled"
+            type="checkbox"
+            [formControl]="environmentFields.enabled"
+            [showIcons]="false"
+          />
+          <label for="flag-enabled">Флаг включён</label>
+        </div>
+        <div class="grid gap-1.5">
+          <label for="flag-rollout">Rollout (%)</label>
+          <input
+            id="flag-rollout"
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            required
+            [formControl]="environmentFields.rolloutPercentage"
+          />
+        </div>
+      </fieldset>
+    </form>
+  }
+</section>

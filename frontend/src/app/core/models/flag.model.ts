@@ -1,4 +1,9 @@
-export type FlagEnvironment = 'Development' | 'Staging' | 'Production';
+export const FLAG_ENVIRONMENTS = [
+  'Development',
+  'Staging',
+  'Production',
+] as const;
+export type FlagEnvironment = (typeof FLAG_ENVIRONMENTS)[number];
 
 export interface FlagListQuery {
   environment: FlagEnvironment;

@@ -1,9 +1,8 @@
 import { Routes } from '@angular/router';
 
-// The form and history TODOs will replace these temporary route components.
-const loadPendingFlagPage = () =>
-  import('./features/flags/flag-page-pending').then(
-    (module) => module.FlagPagePending,
+const loadFlagForm = () =>
+  import('./features/flags/flag-form/flag-form').then(
+    (module) => module.FlagForm,
   );
 
 export const routes: Routes = [
@@ -19,16 +18,19 @@ export const routes: Routes = [
   {
     path: 'flags/new',
     title: 'Создать флаг',
-    loadComponent: loadPendingFlagPage,
+    loadComponent: loadFlagForm,
   },
   {
     path: 'flags/:id/edit',
     title: 'Редактирование флага',
-    loadComponent: loadPendingFlagPage,
+    loadComponent: loadFlagForm,
   },
   {
     path: 'flags/:id/history',
     title: 'История флага',
-    loadComponent: loadPendingFlagPage,
+    loadComponent: () =>
+      import('./features/flags/flag-page-pending').then(
+        (module) => module.FlagPagePending,
+      ),
   },
 ];
