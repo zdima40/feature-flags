@@ -1,0 +1,9 @@
+{
+  "builders": {
+    "playwright": {
+      "implementation": "./run.cjs",
+      "schema": "./schema.json",
+      "description": "Run Playwright against isolated Rollout servers"
+    }
+  }
+}

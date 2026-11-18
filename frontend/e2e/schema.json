@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "headed": { "type": "boolean", "default": false },
+    "grep": { "type": "string" }
+  }
+}

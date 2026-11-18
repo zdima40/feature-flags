@@ -62,6 +62,9 @@
         "test": {
           "builder": "@angular/build:unit-test"
         },
+        "e2e": {
+          "builder": "./e2e:playwright"
+        },
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
