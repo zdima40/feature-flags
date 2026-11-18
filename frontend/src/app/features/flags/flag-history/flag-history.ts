@@ -1,7 +1,7 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TuiLink } from '@taiga-ui/core';
+import { TuiButton, TuiLink } from '@taiga-ui/core';
 import { FlagsApiService } from '../../../core/api/flags-api.service';
 
 const FIELD_LABELS = new Map([
@@ -11,9 +11,10 @@ const FIELD_LABELS = new Map([
   ['enabled', 'Статус'],
   ['rolloutPercentage', 'Rollout'],
 ]);
+const PAGE_SIZE = 20;
 
 @Component({
-  imports: [RouterLink, TuiLink],
+  imports: [RouterLink, TuiButton, TuiLink],
   selector: 'app-flag-history',
   styleUrl: './flag-history.css',
   templateUrl: './flag-history.html',
@@ -28,9 +29,23 @@ export class FlagHistory {
     dateStyle: 'medium',
     timeStyle: 'medium',
   });
-  private readonly history = rxResource({
-    params: () => this.id() ?? undefined,
-    stream: ({ params }) => this.api.history(params),
+  protected readonly page = linkedSignal({
+    source: this.id,
+    computation: () => 1,
+  });
+  protected readonly history = rxResource({
+    params: () => {
+      const id = this.id();
+      return id ? { id, page: this.page() } : undefined;
+    },
+    stream: ({ params }) => this.api.history(params.id, params.page, PAGE_SIZE),
+  });
+  protected readonly pageCount = computed(() => {
+    if (!this.history.hasValue()) {
+      return 1;
+    }
+    const { totalCount, pageSize } = this.history.value();
+    return Math.max(1, Math.ceil(totalCount / pageSize));
   });
 
   protected readonly events = computed(() =>
@@ -42,4 +57,15 @@ export class FlagHistory {
         }))
       : [],
   );
+
+  protected changePage(page: number): void {
+    if (
+      this.history.hasValue() &&
+      !this.history.isLoading() &&
+      page >= 1 &&
+      page <= this.pageCount()
+    ) {
+      this.page.set(page);
+    }
+  }
 }

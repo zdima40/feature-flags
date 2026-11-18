@@ -6,6 +6,30 @@
     <a tuiLink routerLink="/flags">К списку флагов</a>
   </div>
 
+  <div role="status">
+    @if (history.isLoading()) {
+      <p class="mt-4 mb-0">Загружаем историю…</p>
+    } @else if (history.hasValue() && history.value().totalCount === 0) {
+      <p class="mt-4 mb-0">Событий пока нет.</p>
+    }
+  </div>
+  @if (history.status() === 'error') {
+    <div class="mt-5 flex flex-wrap items-center gap-3">
+      <p class="load-error m-0" role="alert">
+        Не удалось загрузить историю флага.
+      </p>
+      <button
+        tuiButton
+        appearance="outline"
+        size="s"
+        type="button"
+        (click)="history.reload()"
+      >
+        Повторить
+      </button>
+    </div>
+  }
+
   @if (events().length) {
     <div
       class="table-scroll mt-5 overflow-x-auto rounded-xl border border-divider"
@@ -48,4 +72,47 @@
       </table>
     </div>
   }
+
+  <nav
+    class="mt-4 flex flex-wrap items-center justify-between gap-3"
+    aria-label="Страницы истории"
+  >
+    <span>
+      @if (history.hasValue()) {
+        Всего событий: {{ history.value().totalCount }}
+      }
+    </span>
+    <div class="flex items-center gap-2">
+      <button
+        tuiButton
+        appearance="outline"
+        size="s"
+        type="button"
+        [attr.aria-disabled]="
+          page() <= 1 || history.isLoading() || !history.hasValue()
+        "
+        (click)="changePage(page() - 1)"
+      >
+        Назад
+      </button>
+      <span class="px-1 tabular-nums" aria-live="polite">
+        Страница {{ page() }}
+        @if (history.hasValue()) {
+          из {{ pageCount() }}
+        }
+      </span>
+      <button
+        tuiButton
+        appearance="outline"
+        size="s"
+        type="button"
+        [attr.aria-disabled]="
+          page() >= pageCount() || history.isLoading() || !history.hasValue()
+        "
+        (click)="changePage(page() + 1)"
+      >
+        Вперёд
+      </button>
+    </div>
+  </nav>
 </section>

@@ -29,8 +29,12 @@ const updated: FlagAuditEvent = {
   changedAtUtc: '2026-11-18T07:25:00Z',
 };
 
-function result(items: FlagAuditEvent[]): PageResponse<FlagAuditEvent> {
-  return { items, totalCount: items.length, page: 1, pageSize: 20 };
+function result(
+  items: FlagAuditEvent[],
+  totalCount = items.length,
+  page = 1,
+): PageResponse<FlagAuditEvent> {
+  return { items, totalCount, page, pageSize: 20 };
 }
 
 describe('FlagHistory', () => {
@@ -54,11 +58,11 @@ describe('FlagHistory', () => {
     http.verify();
   });
 
-  function historyRequest() {
+  function historyRequest(page = 1) {
     TestBed.tick();
     return http.expectOne({
       method: 'GET',
-      url: `/api/flags/${flagId}/history`,
+      url: `/api/flags/${flagId}/history?page=${page}&pageSize=20`,
     });
   }
 
@@ -88,5 +92,56 @@ describe('FlagHistory', () => {
       }).format(new Date(updated.changedAtUtc)),
     );
     expect(page.querySelector('a')?.getAttribute('href')).toBe('/flags');
+  });
+
+  it('requests both pages from the server and uses the total event count', async () => {
+    historyRequest().flush(result([updated], 21));
+    await harness.fixture.whenStable();
+
+    const page = harness.routeNativeElement!;
+    const [previous, next] =
+      page.querySelectorAll<HTMLButtonElement>('nav button');
+    expect(previous.getAttribute('aria-disabled')).toBe('true');
+    expect(page.textContent).toContain('Всего событий: 21');
+    expect(page.textContent).toMatch(/Страница 1\s+из 2/);
+
+    next.click();
+    const second = historyRequest(2);
+    expect(page.textContent).toContain('Загружаем историю');
+    second.flush(result([created], 21, 2));
+    await harness.fixture.whenStable();
+    expect(page.querySelector('tbody')?.textContent).toContain('Флаг создан');
+    expect(page.textContent).toMatch(/Страница 2\s+из 2/);
+    expect(next.getAttribute('aria-disabled')).toBe('true');
+
+    previous.click();
+    historyRequest().flush(result([updated], 21));
+    await harness.fixture.whenStable();
+    expect(page.querySelector('tbody')?.textContent).toContain('Rollout');
+    expect(page.textContent).toMatch(/Страница 1\s+из 2/);
+  });
+
+  it('shows an error, retries the request and handles empty history', async () => {
+    historyRequest().flush(null, {
+      status: 503,
+      statusText: 'Service Unavailable',
+    });
+    await harness.fixture.whenStable();
+
+    const page = harness.routeNativeElement!;
+    expect(page.querySelector('[role="alert"]')?.textContent).toContain(
+      'Не удалось загрузить историю флага',
+    );
+    expect(page.textContent).not.toContain('Событий пока нет');
+    page.querySelector<HTMLButtonElement>('[role="alert"] + button')!.click();
+    historyRequest().flush(result([]));
+    await harness.fixture.whenStable();
+
+    expect(page.querySelector('[role="status"]')?.textContent).toContain(
+      'Событий пока нет',
+    );
+    expect(page.textContent).toContain('Всего событий: 0');
+    expect(page.querySelector('[role="alert"]')).toBeNull();
+    expect(page.querySelector('table')).toBeNull();
   });
 });

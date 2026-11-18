@@ -35,3 +35,12 @@ tbody tr {
   overflow-wrap: anywhere;
   white-space: pre-wrap;
 }
+
+.load-error {
+  color: var(--tui-text-negative);
+}
+
+[aria-disabled='true'] {
+  opacity: 0.55;
+  cursor: default;
+}

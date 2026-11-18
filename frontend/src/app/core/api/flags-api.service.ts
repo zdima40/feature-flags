@@ -31,9 +31,10 @@ export class FlagsApiService {
     return this.http.get<FlagResponse>(`/api/flags/${encodeURIComponent(id)}`);
   }
 
-  history(id: string) {
+  history(id: string, page: number, pageSize: number) {
     return this.http.get<PageResponse<FlagAuditEvent>>(
       `/api/flags/${encodeURIComponent(id)}/history`,
+      { params: { page, pageSize } },
     );
   }
 
